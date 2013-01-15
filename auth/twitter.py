@@ -1,3 +1,7 @@
+"""
+http://packages.python.org/Flask-OAuth/
+"""
+
 from flask_oauth import OAuth
 from flask import Flask, url_for, request
 

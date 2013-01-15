@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- maybe some stuff from html5bp should be added? -->
+<html>
+	<head>
+		<title>{% block title %}TM2{% endblock %}</title>
+	</head>
+	<body>
+		{% with messages = get_flashed_messages() %}
+			{% if messages %}
+				<ul id="messages">
+					{% for message in messages %}
+						<li class="message">{{ message }}</li>
+					{% endfor %}
+				</ul>
+			{% endif %}
+		{% endwith %}
+		<section id="main">
+			{% block main %}
+				<p>hi. this is not the template you are looking for.</p>
+			{% endblock %}
+		</section>
+	</body>
+</html>
