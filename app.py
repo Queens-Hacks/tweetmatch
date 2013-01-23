@@ -1,14 +1,22 @@
 
 import os
-from flask import Flask, url_for, render_template, flash
-from auth import twitter
+from flask import Flask, url_for, render_template, flash, request
+from flask_oauth import OAuth
 import config
 
 
 app = Flask(__name__)
 
-# TODO: move secret key to config
-app.secret_key = "laij3lifajl3ijalijf3liajw3lialw"
+oauth = OAuth()
+
+twitter = oauth.remote_app('twitter',
+    base_url='https://api.twitter.com/1/',
+    request_token_url='https://api.twitter.com/oauth/request_token',
+    access_token_url='https://api.twitter.com/oauth/access_token',
+    authorize_url='https://api.twitter.com/oauth/authenticate',
+    consumer_key='tM3lu6kav7EFzljmXjhHFg',
+    consumer_secret='4kBX7EfbBp7agsKfkgF1S5luiG0pHrlOgWWLbYzqqY'
+)
 
 
 @app.route('/')
@@ -18,12 +26,17 @@ def hello():
     return render_template('home.html', **content)
 
 
-@app.route('/auth')
+@app.route('/login')
 def login():
-    return twitter.login()
+    #try:
+    return twitter.authorize(callback=url_for('oauth_authorized',
+        next=request.referrer))
+    #except Exception as e:
+    #    return "500 error: {}".format(e), 500
 
 
 @app.route('/account')
+@twitter.authorized_handler
 def account():
     """let a user manage their account"""
     return "account!"
@@ -48,6 +61,5 @@ def page_not_found(error):
 
 
 if __name__ == '__main__':
-    # todo: get these from config
-    port = int(os.environ.get('PORT', 5000)) 
-    app.run(host='0.0.0.0', port=port, debug=config.DEBUG)
+    app.secret_key = config.SECRET_KEY
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
