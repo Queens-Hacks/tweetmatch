@@ -20,6 +20,8 @@ env = os.environ.get
 
 DEBUG = True # env('DEBUG', True) # !IMPORTANT: set false on heroku
 
+SQLALCHEMY_DATABASE_URI = 'sqlite:///dev-db.sqlite3'
+
 HOST = env('IP', '127.0.0.1') # set to 0.0.0.0 on heroku
 PORT = env('PORT', 5000) # set automatically by heroku
 
