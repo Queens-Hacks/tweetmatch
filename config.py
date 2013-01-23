@@ -18,7 +18,7 @@ in a production environment (since we'll have to do that on heroku.)
 import os
 env = os.environ.get
 
-DEBUG = TRUE # env('DEBUG', True) # !IMPORTANT: set false on heroku
+DEBUG = True # env('DEBUG', True) # !IMPORTANT: set false on heroku
 
 HOST = env('IP', '127.0.0.1') # set to 0.0.0.0 on heroku
 PORT = env('PORT', 5000) # set automatically by heroku
