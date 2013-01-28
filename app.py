@@ -58,8 +58,8 @@ twitter = oauth.remote_app('twitter',
     request_token_url='https://api.twitter.com/oauth/request_token',
     access_token_url='https://api.twitter.com/oauth/access_token',
     authorize_url='https://api.twitter.com/oauth/authenticate',
-    consumer_key='tM3lu6kav7EFzljmXjhHFg',
-    consumer_secret='4kBX7EfbBp7agsKfkgF1S5luiG0pHrlOgWWLbYzqqY'
+    consumer_key=config.TWITTER_CONSUMER_KEY,
+    consumer_secret=config.TWITTER_CONSUMER_SECRET,
 )
 
 def redirect_url():

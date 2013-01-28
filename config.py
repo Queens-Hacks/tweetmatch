@@ -18,7 +18,10 @@ in a production environment (since we'll have to do that on heroku.)
 import os
 env = os.environ.get
 
-DEBUG = True # env('DEBUG', True) # !IMPORTANT: set false on heroku
+DEBUG = (env('DEBUG') == 'True')
+
+TWITTER_CONSUMER_KEY = env('TWITTER_CONSUMER_KEY') # get from dev.twitter.com
+TWITTER_CONSUMER_SECRET = env('TWITTER_CONSUMER_SECRET')
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///dev-db.sqlite3'
 
