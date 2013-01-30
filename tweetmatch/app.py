@@ -1,4 +1,6 @@
-
+"""
+keeping this file temporarily as chunks are torn out into modules.
+"""
 import os
 from functools import wraps
 from datetime import datetime
@@ -9,11 +11,9 @@ from flask_oauth import OAuth
 import config
 
 
-if config.DEBUG:
-    app = Flask(__name__, static_folder='static')
-else:
-    app = Flask(__name__)
+app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
+
 db = SQLAlchemy(app)
 
 

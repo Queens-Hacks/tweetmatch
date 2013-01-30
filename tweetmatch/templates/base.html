@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- maybe some stuff from html5bp should be added? -->
+<html class="no-js">
+	<head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+		<title>{{ title|default('TweetMatch') }}</title>
+
+		<link rel="stylesheet/less" type="text/css"
+			href="{{ url_for('static', filename='css/less/main.less') }}" />
+		<script src="{{ url_for('static', filename='js/vendor/less-1.3.3.min.js') }}"></script>
+
+		<meta name="description" content="Match tweets..." />
+        <meta name="viewport" content="width=device-width" />
+
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="author" type="text/plain" href="/humans.txt" />
+	</head>
+	<body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+		{% block page %}
+			<p>hi. this is not the template you are looking for.</p>
+		{% endblock %}
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="{{ url_for('static', filename='js/vendor/jquery.min.js') }}"><\/script>')</script>
+        {# PUT OTHER JS STUFF HERE #}
+        <script>
+            var _gaq=[['_setAccount','UA-1110199-20'],['_trackPageview']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+	</body>
+</html>
+ 
