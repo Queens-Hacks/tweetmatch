@@ -3,3 +3,4 @@ venv
 *.un~
 *.swp
 dev-db.sqlite3
+twitter_keys.py # private!!
