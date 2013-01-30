@@ -16,5 +16,27 @@ from tweetmatch import app, models
 
 @app.route('/')
 def hello():
-    return render_template('home.html')
+    challenge = {
+        'tweet': {
+            'text': '.@BarackObama modern baby monitors have night vision technology did babies kill bin laden ,',
+            'time': '30 Jan 2013',
+            'id': 404838304,
+        },
+        'suspects': [
+            {
+                'username': '@BarackObama',
+                'name': 'Barack Obama',
+                'photo': 'url',
+            },
+            {
+                'username': '@robdalaney',
+                'name': 'rob delany',
+                'photo': 'url',
+            },
+        ]
+    }
+    context = {
+        'challenge': challenge,
+    }
+    return render_template('home.html', **context)
 
