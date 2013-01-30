@@ -9,7 +9,10 @@ from flask_oauth import OAuth
 import config
 
 
-app = Flask(__name__)
+if config.DEBUG:
+    app = Flask(__name__, static_folder='static')
+else:
+    app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 db = SQLAlchemy(app)
 
@@ -100,7 +103,14 @@ def hello():
     else:
         flash('{}'.format(result.status))
         flash('tweeted! {}'.format(result.data))
-    content = {}
+    content = {
+        'title': 'TweetMatch',
+        'object': {
+            'subobject': 'property',
+        },
+        'things': ['one', 'two'],
+    }
+    content['title'] = 'blah'
     return render_template('home.html', **content)
 
 
@@ -148,5 +158,6 @@ def page_not_found(error):
 
 
 if __name__ == '__main__':
+
     app.secret_key = config.SECRET_KEY
     app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
