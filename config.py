@@ -18,10 +18,16 @@ in a production environment (since we'll have to do that on heroku.)
 import os
 env = os.environ.get
 
-DEBUG = (env('DEBUG') == 'True')
+try:
+	import twitter_keys
+	DEBUG = True
+except ImportError:
+	DEBUG = False
 
-TWITTER_CONSUMER_KEY = env('TWITTER_CONSUMER_KEY') # get from dev.twitter.com
-TWITTER_CONSUMER_SECRET = env('TWITTER_CONSUMER_SECRET')
+TWITTER_CONSUMER_KEY = env('TWITTER_CONSUMER_KEY', twitter_keys.TWITTER_CONSUMER_KEY) # get from dev.twitter.com
+TWITTER_CONSUMER_SECRET = env('TWITTER_CONSUMER_SECRET', twitter_keys.TWITTER_CONSUMER_SECRET)
+
+
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///dev-db.sqlite3'
 
