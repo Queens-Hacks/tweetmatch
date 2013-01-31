@@ -25,8 +25,7 @@ follows = db.Table('follows',
 
 class TwitterUser(db.Model):
     """People who have registered with the site"""
-    id = db.Column(db.Integer, primary_key=True)
-    twitter_id = db.Column(db.String(64), unique=True)
+    id = db.Column(db.String(64), primary_key=True) # from twitter
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(80))
@@ -35,10 +34,11 @@ class TwitterUser(db.Model):
     follows = db.relationship('Tweeter', secondary=follows,
         backref=db.backref('followers_here'))
 
-    def __init__(self, twitter_id, username, name):
-        self.twitter_id = twitter_id
+    def __init__(self, twitter_id, username, name, photo):
+        self.id = twitter_id
         self.username = username
         self.name = name
+        self.pic_url = photo
 
     def __repr__(self):
         return '<TwitterUser @{}>'.format(self.username)
@@ -46,8 +46,7 @@ class TwitterUser(db.Model):
 
 class Tweeter(db.Model):
     """twitter accounts"""
-    id = db.Column(db.Integer, primary_key=True)
-    twitter_id = db.Column(db.String(64), unique=True)
+    id = db.Column(db.String(64), primary_key=True)
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(80))
@@ -55,8 +54,7 @@ class Tweeter(db.Model):
 
 class Tweet(db.Model):
     """Local databse of collected tweets"""
-    id = db.Column(db.Integer, primary_key=True)
-    tweet_id = db.Column(db.String(64), unique=True)
+    id = db.Column(db.String(64), primary_key=True)
     text = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime)
 

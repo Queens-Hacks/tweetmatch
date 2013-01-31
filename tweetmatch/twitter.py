@@ -6,6 +6,7 @@ http://packages.python.org/Flask-OAuth/
 from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
 from tweetmatch import app
+from tweetmatch.models import TwitterUser, db
 
 
 #oauth = OAuth()
@@ -47,16 +48,38 @@ def logout():
 def oauth_authorized(resp):
     next_url = request.args.get('next') or url_for('hello')
     if resp is None:
-        flash(u'You denied the request to sign in.')
+        flash(u'Could not sign in :(')
         return redirect(next_url)
 
     session['twitter_token'] = (
         resp['oauth_token'],
         resp['oauth_token_secret']
     )
-    session['twitter_user'] = resp['screen_name']
 
-    flash('signed in as %s' % resp['screen_name'])
+    user_id = resp['user_id']
+    me = TwitterUser.query.get(user_id)
+    if me:
+        session['user'] = me
+        flash('welcome back, {} :)'.format(me.name))
+
+    else:
+        response = twitter.get('users/show.json', data={
+            'screen_name': resp['screen_name'],
+            'include_entities': False,
+        })
+        if response.status != 200:
+            print 'ERR', response.status
+            flash('error...')
+        else:
+            me = TwitterUser(
+                twitter_id=resp['user_id'],
+                username=resp['screen_name'],
+                name=response.data['name'],
+                photo=response.data['profile_image_url'],
+            )
+            db.session.add(me)
+            db.session.commit()
+
     return redirect_url()
 
 
