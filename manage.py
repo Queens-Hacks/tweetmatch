@@ -59,5 +59,13 @@ def runproduction():
     app.run()
 
 
+@manager.command
+def activate(env='venv'):
+    """activate the current shell's virtualenv"""
+    import os
+    venv_path = os.path.join(env, 'bin', 'activate')
+    os.system('/bin/bash --rcfile {}'.format(venv_path))
+
+
 if __name__ == '__main__':
     manager.run()
