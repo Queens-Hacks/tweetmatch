@@ -19,5 +19,7 @@ app = Flask(__name__)
 
 # …then import the components.
 import tweetmatch.config
+import tweetmatch.twitter
 import tweetmatch.views
-import tweetmatch.assets
+#import tweetmatch.assets
+

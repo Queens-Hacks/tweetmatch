@@ -22,7 +22,7 @@ if str(os.environ.get('DEBUG')).lower() in ['true', 'on', 'yes', 'debug']:
     app.config['DEBUG'] = True
 
 # try to import twitter keys
-twitter_keys_file = os.path.join('..', app.instance_path)
+twitter_keys_file = os.path.join('..', 'twitter_keys.py')
 app.config.from_pyfile(twitter_keys_file, silent=True)
 # override with environment config...
 environ_twitter_key = os.environ.get('TWITTER_CONSUMER_KEY')

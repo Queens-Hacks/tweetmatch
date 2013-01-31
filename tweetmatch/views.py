@@ -15,7 +15,8 @@ from tweetmatch import app, models
 
 
 @app.route('/')
-def hello():
+@app.route('/challenge')
+def hello(challenge=None):
     challenge = {
         'tweet': {
             'text': '.@BarackObama modern baby monitors have night vision technology did babies kill bin laden ,',
@@ -40,3 +41,18 @@ def hello():
     }
     return render_template('home.html', **context)
 
+
+@app.route('/challenge/<int:challenge_id>')
+@app.route('/challenge/<int:challenge_id>/<challenge_slug>')
+def challenge(challenge_id, challenge_slug=None):
+    return 'hey'
+
+
+@app.route('/account')
+def me():
+    return 'you'
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404
