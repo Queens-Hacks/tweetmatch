@@ -28,7 +28,7 @@ class TwitterUser(db.Model):
     id = db.Column(db.String(64), primary_key=True) # from twitter
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
-    pic_url = db.Column(db.String(80))
+    pic_url = db.Column(db.String(250))
     bloom = db.Column(db.Binary(length=2000))
     
     following = db.relationship('Tweeter', secondary=follows,
@@ -49,7 +49,7 @@ class Tweeter(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
-    pic_url = db.Column(db.String(80))
+    pic_url = db.Column(db.String(250))
 
     def __init__(self, id, username, name=None, pic_url=None):
         self.id = id
