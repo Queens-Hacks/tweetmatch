@@ -18,14 +18,14 @@ db = SQLAlchemy(app)
 
 
 follows = db.Table('follows',
-    db.Column('twitter_user_id', db.Integer, db.ForeignKey('twitter_user.id')),
-    db.Column('tweeter_id', db.Integer, db.ForeignKey('tweeter.id'))
+    db.Column('twitter_user_id', db.String(64), db.ForeignKey('twitter_user.id')),
+    db.Column('tweeter_id', db.String(64), db.ForeignKey('tweeter.id'))
 )
 
 
 class TwitterUser(db.Model):
     """People who have registered with the site"""
-    id = db.Column(db.Integer, primary_key=True) # from twitter
+    id = db.Column(db.String(64), primary_key=True) # from twitter
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(80))
@@ -46,7 +46,7 @@ class TwitterUser(db.Model):
 
 class Tweeter(db.Model):
     """twitter accounts"""
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(64), primary_key=True)
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(80))
@@ -63,11 +63,11 @@ class Tweeter(db.Model):
 
 class Tweet(db.Model):
     """Local databse of collected tweets"""
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(64), primary_key=True)
     text = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('tweeter.id'))
+    user_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
     user = db.relationship('Tweeter',
         backref=db.backref('tweets', lazy='dynamic'))
 
@@ -84,10 +84,10 @@ class Tweet(db.Model):
 class Challenge(db.Model):
     """gotta catch em all"""
     id = db.Column(db.Integer, primary_key=True)
-    tweet_id = db.Column(db.Integer, db.ForeignKey('tweet.id'))
+    tweet_id = db.Column(db.String(64), db.ForeignKey('tweet.id'))
     tweet = db.relationship('Tweet',
         backref=db.backref('challenges', lazy='dynamic'))
-    poser_id = db.Column(db.Integer, db.ForeignKey('tweeter.id'))
+    poser_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
     poser = db.relationship('Tweeter',
         backref=db.backref('spoofs', lazy='dynamic'))
 
