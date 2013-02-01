@@ -93,23 +93,23 @@ def oauth_authorized(resp):
                 print ('......')
                 flash(timeline.data)
                 for tweet in timeline.data:
-                    tweeter = Tweeter.query.get(tweet['user']['id_str'])
+                    tweeter = Tweeter.query.get(tweet['user']['id'])
 
-                    tweetobj = Tweet.query.get(tweet['id_str'])
+                    tweetobj = Tweet.query.get(tweet['id'])
                     if not tweetobj:
                         print 'creating tweet', tweet['text']
 
                         if not tweeter:
                             print 'creating tweeter', tweet['user']['screen_name']
                             tweeter = Tweeter(
-                                id=tweet['user']['id_str'],
+                                id=tweet['user']['id'],
                                 username=tweet['user']['screen_name'],
                                 name=tweet['user']['name'],
                                 pic_url=tweet['user']['profile_image_url'],
                             )
 
                         tweetobj = Tweet(
-                            id=tweet['id_str'],
+                            id=tweet['id'],
                             text=tweet['text'],
                             timestamp=None,
                             user=tweeter,

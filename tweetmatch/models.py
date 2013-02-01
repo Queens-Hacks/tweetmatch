@@ -25,7 +25,7 @@ follows = db.Table('follows',
 
 class TwitterUser(db.Model):
     """People who have registered with the site"""
-    id = db.Column(db.String(64), primary_key=True) # from twitter
+    id = db.Column(db.Integer, primary_key=True) # from twitter
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(80))
@@ -46,7 +46,7 @@ class TwitterUser(db.Model):
 
 class Tweeter(db.Model):
     """twitter accounts"""
-    id = db.Column(db.String(64), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(80))
@@ -63,7 +63,7 @@ class Tweeter(db.Model):
 
 class Tweet(db.Model):
     """Local databse of collected tweets"""
-    id = db.Column(db.String(64), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime)
 
