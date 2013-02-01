@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 http://packages.python.org/Flask-OAuth/
 """
