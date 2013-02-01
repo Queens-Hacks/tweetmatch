@@ -19,10 +19,15 @@ from tweetmatch.models import Tweeter, Tweet
 @app.route('/')
 @app.route('/challenge')
 def hello(challenge=None):
-    tweet = Tweet.query[random.randrange(Tweet.query.count())]
-    impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
-    suspects = [tweet.user, impostor]
-    random.shuffle(suspects)
+    try:
+        tweet = Tweet.query[random.randrange(Tweet.query.count())]
+        impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
+        suspects = [tweet.user, impostor]
+        random.shuffle(suspects)
+    except ValueError:
+        # no tweets imported yet
+        tweet = 'blah blah blah'
+        suspects = ['a', 'b']
     challenge = {
         'id': 1,
         'tweet': tweet,
