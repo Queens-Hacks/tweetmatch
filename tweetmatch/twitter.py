@@ -70,7 +70,7 @@ def oauth_authorized(resp):
             'include_entities': False,
         })
         if response.status != 200:
-            print 'ERR', response.status
+            print 'ERR'#, response.status
             flash('error...')
         else:
             me = TwitterUser(
@@ -86,9 +86,9 @@ def oauth_authorized(resp):
                 'exclude_replies': True,
                 #'contributor_details': True,
             })
-            print 'got status', timeline.status
+            print 'got status'#, timeline.status
             if timeline.status != 200:
-                print 'ERR', timeline.data
+                print 'ERR'#, timeline.data
                 flash('error asking about friends')
             else:
                 print ('......')
@@ -98,10 +98,10 @@ def oauth_authorized(resp):
 
                     tweetobj = Tweet.query.get(tweet['id_str'])
                     if not tweetobj:
-                        print 'creating tweet', tweet['text']
+                        print 'creating tweet'#, tweet['text']
 
                         if not tweeter:
-                            print 'creating tweeter', tweet['user']['screen_name']
+                            print 'creating tweeter'#, tweet['user']['screen_name']
                             tweeter = Tweeter(
                                 id=tweet['user']['id_str'],
                                 username=tweet['user']['screen_name'],
