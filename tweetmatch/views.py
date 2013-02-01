@@ -10,36 +10,25 @@
 """
 
 
+import random
 from flask import render_template
-from tweetmatch import app, models
+from tweetmatch import app
+from tweetmatch.models import Tweeter, Tweet
 
 
 @app.route('/')
 @app.route('/challenge')
 def hello(challenge=None):
+    tweet = Tweet.query[random.randrange(Tweet.query.count())]
+    impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
+    suspects = [tweet.user, impostor]
+    random.shuffle(suspects)
     challenge = {
-        'tweet': {
-            'text': '.@BarackObama modern baby monitors have night vision technology did babies kill bin laden ,',
-            'time': '30 Jan 2013',
-            'id': 404838304,
-        },
-        'suspects': [
-            {
-                'username': '@BarackObama',
-                'name': 'Barack Obama',
-                'photo': 'url',
-            },
-            {
-                'username': '@robdalaney',
-                'name': 'rob delany',
-                'photo': 'url',
-            },
-        ]
+        'id': 1,
+        'tweet': tweet,
+        'suspects': suspects,
     }
-    context = {
-        'challenge': challenge,
-    }
-    return render_template('home.html', **context)
+    return render_template('home.html', challenge=challenge)
 
 
 @app.route('/challenge/<int:challenge_id>')
