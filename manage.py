@@ -61,7 +61,7 @@ def runproduction():
     logging.warning('app config port: {}'.format(app.config['PORT']))
     import os
     logging.warning('env port: {}'.format(os.environ.get('PORT', 8765)))
-    app.run()
+    app.run(port=app.config['PORT'])
 
 
 @manager.command
