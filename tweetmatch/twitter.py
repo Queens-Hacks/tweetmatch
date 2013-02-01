@@ -6,10 +6,9 @@ http://packages.python.org/Flask-OAuth/
 from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
 from tweetmatch import app
-from tweetmatch.models import TwitterUser, db
+from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
 
 
-#oauth = OAuth()
 twitter = OAuth().remote_app('twitter',
     base_url='https://api.twitter.com/1/',
     request_token_url='https://api.twitter.com/oauth/request_token',
@@ -40,6 +39,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
+    flash('session cleared')
     return redirect_url()
 
 
@@ -60,9 +60,10 @@ def oauth_authorized(resp):
     me = TwitterUser.query.get(user_id)
     if me:
         session['user'] = me
-        flash('welcome back, {} :)'.format(me.name))
+        flash('hello again {} :)'.format(me.name))
 
     else:
+        print('getting user data')
         response = twitter.get('users/show.json', data={
             'screen_name': resp['screen_name'],
             'include_entities': False,
@@ -77,6 +78,48 @@ def oauth_authorized(resp):
                 name=response.data['name'],
                 photo=response.data['profile_image_url'],
             )
+            flash('welcome, {} :)'.format(me.name))
+
+            print('gathering user\'s timeline data...')
+            timeline = twitter.get('statuses/home_timeline.json', data={
+                'exclude_replies': True,
+                #'contributor_details': True,
+            })
+            print 'got status', timeline.status
+            if timeline.status != 200:
+                print 'ERR', timeline.data
+                flash('error asking about friends')
+            else:
+                print ('......')
+                flash(timeline.data)
+                for tweet in timeline.data:
+                    tweeter = Tweeter.query.get(tweet['user']['id_str'])
+
+                    tweetobj = Tweet.query.get(tweet['id_str'])
+                    if not tweetobj:
+                        print 'creating tweet', tweet['text']
+
+                        if not tweeter:
+                            print 'creating tweeter', tweet['user']['screen_name']
+                            tweeter = Tweeter(
+                                id=tweet['user']['id_str'],
+                                username=tweet['user']['screen_name'],
+                                name=tweet['user']['name'],
+                                pic_url=tweet['user']['profile_image_url'],
+                            )
+
+                        tweetobj = Tweet(
+                            id=tweet['id_str'],
+                            text=tweet['text'],
+                            timestamp=None,
+                            user=tweeter,
+                        )
+
+                    me.following.append(tweeter)
+                    db.session.add(tweeter)
+                    db.session.add(tweetobj)
+                    db.session.commit()
+
             db.session.add(me)
             db.session.commit()
 

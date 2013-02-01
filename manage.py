@@ -46,6 +46,8 @@ class DebugServer(Server):
 
     def handle(self, app, *args, **kwargs):
         app.config['DEBUG'] = self.use_debugger
+        # use a threaded environment
+        app.config['THREADED'] = True
         super(DebugServer, self).handle(app, *args, **kwargs)
 
 

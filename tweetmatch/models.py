@@ -29,10 +29,10 @@ class TwitterUser(db.Model):
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(80))
-    # bloom = 
+    bloom = db.Column(db.Binary(length=2000))
     
-    follows = db.relationship('Tweeter', secondary=follows,
-        backref=db.backref('followers_here'))
+    following = db.relationship('Tweeter', secondary=follows,
+        backref=db.backref('following_here'))
 
     def __init__(self, twitter_id, username, name, photo):
         self.id = twitter_id
@@ -51,6 +51,15 @@ class Tweeter(db.Model):
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(80))
 
+    def __init__(self, id, username, name=None, pic_url=None):
+        self.id = id
+        self.username = username
+        self.name = name
+        self.pic_url = pic_url
+
+    def __repr__(self):
+        return '<Tweeter @{}>'.format(self.username)
+
 
 class Tweet(db.Model):
     """Local databse of collected tweets"""
@@ -62,13 +71,14 @@ class Tweet(db.Model):
     user = db.relationship('Tweeter',
         backref=db.backref('tweets', lazy='dynamic'))
 
-    def __init__(self, tweet_id, text, timestamp):
-        self.tweet_id = tweet_id
+    def __init__(self, id, text, timestamp, user):
+        self.id = id
         self.text = text
         self.timestamp = timestamp
+        self.user = user
 
     def __repr__(self):
-        return '<Tweet {:.12}>'.format(self.tweet)
+        return '<Tweet {:.9}...>'.format(self.text)
 
 
 class Challenge(db.Model):
@@ -81,6 +91,9 @@ class Challenge(db.Model):
     poser = db.relationship('Tweeter',
         backref=db.backref('spoofs', lazy='dynamic'))
 
+    def __repr__(self):
+        return '<Challenge {}>'.format(self.id)
+
 
 class Guess(db.Model):
     """who's the best"""
@@ -91,5 +104,8 @@ class Guess(db.Model):
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'))
     challenge = db.relationship('Challenge',
         backref=db.backref('guesses', lazy='dynamic'))
+
+    def __repr__(self):
+        return '<Guess for {} by {}>'.format(self.challenge, self.id)
 
 

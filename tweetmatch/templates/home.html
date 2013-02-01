@@ -1,7 +1,20 @@
 {% extends 'base.html' %}
 {% block page %}
 
-hello. arbitrary html goes here.
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>no messages nom essages nom nom</p>
+    {% endif %}
+{% endwith %}
+
+<h1>blah</h1>
 
 {% endblock %}
 
