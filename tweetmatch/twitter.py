@@ -40,7 +40,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('session cleared')
+    flash('bye bye :(')
     return redirect_url()
 
 
