@@ -58,9 +58,9 @@ manager.add_command('runserver', DebugServer(use_debugger=True))
 @manager.command
 def runproduction():
     """Run on production"""
-    print 'app config port': app.config['PORT']
+    logging.warning('app config port: {}'.format(app.config['PORT']))
     import os
-    print 'env port': os.environ.get('PORT', 5000)
+    logging.warning('env port: {}'.format(os.environ.get('PORT', 8765)))
     app.run()
 
 
