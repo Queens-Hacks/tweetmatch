@@ -30,6 +30,7 @@ class TwitterUser(db.Model):
     name = db.Column(db.String(21))
     pic_url = db.Column(db.String(250))
     bloom = db.Column(db.Binary(length=2000))
+    follow_list = db.Column(db.String(64))
     
     following = db.relationship('Tweeter', secondary=follows,
         backref=db.backref('following_here'))

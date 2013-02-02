@@ -3,7 +3,7 @@
 http://packages.python.org/Flask-OAuth/
 """
 
-
+import logging
 from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
 from tweetmatch import app
@@ -11,7 +11,7 @@ from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
 
 
 twitter = OAuth().remote_app('twitter',
-    base_url='https://api.twitter.com/1/',
+    base_url='https://api.twitter.com/1.1/',
     request_token_url='https://api.twitter.com/oauth/request_token',
     access_token_url='https://api.twitter.com/oauth/access_token',
     authorize_url='https://api.twitter.com/oauth/authenticate',
@@ -60,19 +60,22 @@ def oauth_authorized(resp):
     user_id = resp['user_id']
     me = TwitterUser.query.get(user_id)
     if me:
-        session['user'] = me
         flash('hello again {} :)'.format(me.name))
+        session['me'] = me
+        load_timeline_tweets()
 
     else:
-        print('getting user data')
         response = twitter.get('users/show.json', data={
             'screen_name': resp['screen_name'],
             'include_entities': False,
         })
         if response.status != 200:
-            print 'ERR'#, response.status
+            loggint.warning
+            for error in lists.data['errors']:
+                logging.error('twitter {}: {}'.format(error['code'],
+                                                      error['message']))
             flash('error...')
-            
+
         me = TwitterUser(
             twitter_id=resp['user_id'],
             username=resp['screen_name'],
@@ -80,51 +83,102 @@ def oauth_authorized(resp):
             photo=response.data['profile_image_url'],
         )
         flash('welcome, {} :)'.format(me.name))
+        session['me'] = me
+        db.session.add(me)
+        db.session.commit()
 
-    print('gathering user\'s timeline data...')
-    timeline = twitter.get('statuses/home_timeline.json', data={
-        'exclude_replies': True,
-        #'contributor_details': True,
-    })
-    print 'got status'#, timeline.status
-    if timeline.status != 200:
-        print 'ERR'#, timeline.data
-        flash('error asking about friends')
-    else:
-        print ('......')
-        flash(timeline.data)
-        for tweet in timeline.data:
-            tweeter = Tweeter.query.get(tweet['user']['id_str'])
-
-            tweetobj = Tweet.query.get(tweet['id_str'])
-            if not tweetobj:
-                print 'creating tweet'#, tweet['text']
-
-                if not tweeter:
-                    print 'creating tweeter'#, tweet['user']['screen_name']
-                    tweeter = Tweeter(
-                        id=tweet['user']['id_str'],
-                        username=tweet['user']['screen_name'],
-                        name=tweet['user']['name'],
-                        pic_url=tweet['user']['profile_image_url'],
-                    )
-
-                tweetobj = Tweet(
-                    id=tweet['id_str'],
-                    text=tweet['text'],
-                    timestamp=None,
-                    user=tweeter,
-                )
-
-            me.following.append(tweeter)
-            db.session.add(tweeter)
-            db.session.add(tweetobj)
-            db.session.commit()
-
-    db.session.add(me)
-    db.session.commit()
+    session['my_id'] = me.id
 
     return redirect_url()
 
 
+def load_timeline_tweets(from_list_id=None):
+    """a user must be authenticated already
+    https://dev.twitter.com/docs/api/1.1/get/statuses/home_timeline
+    https://dev.twitter.com/docs/api/1.1/get/lists/statuses
+    """
+    from_list_id = from_list_id or session['me'].follow_list
+    logging.info('gathering {}\'s timeline...', session['me'].name)
+    request_data = {
+        'count': 200,
+        # 'since_id': ...
+    }
+    if from_list_id:
+        request_data.update({
+            'list_id': from_list_id,
+            'include_rts': False,
+        })
+        timeline = twitter.get('lists/statuses.json', data=request_data)
+    else:
+        request_data.update({
+            'exclude_replies': True,
+        })
+        timeline = twitter.get('statuses/home_timeline.json', data=request_data)
+
+    if timeline.status != 200:
+        for error in lists.data['errors']:
+            logging.error('twitter {}: {}'.format(error['code'],
+                                                  error['message']))
+        flash('twitter is being mean :(')
+        # and do something about it....    
+
+    logging.info('saving new timeline tweets and any new users...')
+    for tweet_data in timeline.data:
+        # first, see if we already have this tweet
+        tweet = Tweet.query.get(tweet_data['id_str'])
+        if tweet:
+            continue
+
+        # new tweet -- do we have its user yet?
+        tweeter = Tweeter.query.get(tweet_data['user']['id_str'])
+        if not tweeter:
+            user_data = tweet_data['user']
+            logging.info('new tweeter {}'.format(user_data['screen_name']))
+
+            tweeter = Tweeter(
+                id=user_data['id_str'],
+                username=user_data['screen_name'],
+                name=user_data['name'],
+                pic_url=user_data['profile_image_url'],
+            )
+            db.session.add(tweeter)
+
+
+        logging.info('new tweet from {}'.format(tweeter.username))
+        tweet = Tweet(
+            id=tweet_data['id_str'],
+            text=tweet_data['text'],
+            timestamp=None,
+            user=tweeter,
+        )
+        db.session.add(tweet)
+
+        db.session.commit()
+
+
+def get_lists():
+    """return a list of lists a user subscribes to.
+    and maybe suggest some popular lists...
+    https://dev.twitter.com/docs/api/1.1/get/lists/list
+    """
+    lists = twitter.get('lists/list.json')
+    if lists.status != 200:
+        for error in lists.data['errors']:
+            logging.error('twitter {}: {}'.format(error['code'],
+                                                  error['message']))
+        flash('twiter is being mean again :(')
+
+    return lists.data
+
+
+def set_list(list_id):
+    """set the logged-in user's twitter list of people to pull tweets from"""
+    me = TwitterUser.query.get(session['my_id'])
+    if not me:
+        logging.error('could not get logged in user')
+        flash('um... are you logged in?')
+
+    me.follow_list = list_id
+    db.session.add(me)
+    db.session.commit()
 

@@ -11,9 +11,10 @@
 
 
 import random
-from flask import render_template
+from flask import render_template, session, redirect, url_for, request
 from tweetmatch import app
-from tweetmatch.models import Tweeter, Tweet
+from tweetmatch.twitter import get_lists, set_list
+from tweetmatch.models import TwitterUser, Tweeter, Tweet
 
 
 @app.route('/')
@@ -42,9 +43,30 @@ def challenge(challenge_id, challenge_slug=None):
     return 'hey'
 
 
-@app.route('/account')
+@app.route('/account', methods=['GET', 'POST'])
 def me():
-    return 'you'
+    # logged in?
+    if not session.get('twitter_token'):
+        return redirect(url_for('login'))
+
+    if request.method == 'POST' and 'list' in request.form:
+        if request.form['list'] == 'none':
+            set_list(None)
+        else:
+            set_list(request.form['list'])
+
+    lists = get_lists()
+    lists.append({'name': 'don\'t use a list', 'id_str': None})
+
+    current_list_id = TwitterUser.query.get(session['my_id']).follow_list
+    try:
+        current_list = [l for l in lists if l['id_str'] == current_list_id][0]
+    except IndexError:
+        current_list = lists[-1]
+
+    print 'clist', current_list
+
+    return render_template('account.html', lists=lists, current_list=current_list)
 
 
 @app.errorhandler(404)

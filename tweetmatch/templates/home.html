@@ -14,17 +14,18 @@
 
 <a href="{{ url_for('login') }}">login</a>
 <a href="{{ url_for('logout') }}">logout</a>
+<a href="{{ url_for('me') }}">account</a>
 
 <h1>{{ challenge.tweet.text }}</h1>
 
 <form action="/" method="post">
     {% for suspect in challenge.suspects %}
-        <label for="{{ suspect.id }}">
+        <label for="suspect-{{ suspect.id }}">
             <h3>@{{ suspect.username }}</h3>
             <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{% if suspect.pic_url %}{{ suspect.pic_url.replace('_normal', '') }}{% else %}http://images.wikia.com/avatar/images/0/04/Angry_Aang_in_Avatar_State.png{% endif %}" width="150" />
             <p>{{ suspect.name }}</p>
         </label>
-        <input type="radio" id="{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
+        <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
     {% endfor %}
     <input type="submit" />
 </form>
