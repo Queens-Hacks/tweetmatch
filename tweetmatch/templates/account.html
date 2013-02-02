@@ -1,33 +1,33 @@
-{% extends 'base.html' %}
-{% block page %}
+{% extends 'ui_boilerplate.html' %}
+{% block content %}
 
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <ul class="flashes">
-            {% for message in messages %}
-                <li>{{ message }}</li>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+
+    {% if lists %}
+        <p>current list: {{ current_list.name }}</p>
+        <ul>
+            <form action="{{ url_for('me') }}" method="POST">
+            {% for list in lists %}
+                <li>
+                    <input type="radio" name="list" value="{{ list.id_str }}"
+                           id="list-{{ list.id_str }}" />
+                    <label for="list-{{ list.id_str }}">{{ list.name }}</label>
+                </li>
             {% endfor %}
+            <input type="submit" value='Choose'>
+            </form>
         </ul>
+    {% else %}
+        <p>no lists :(</p>
     {% endif %}
-{% endwith %}
-
-
-{% if lists %}
-    <p>current list: {{ current_list.name }}</p>
-    <ul>
-        <form action="{{ url_for('me') }}" method="POST">
-        {% for list in lists %}
-            <li>
-                <input type="radio" name="list" value="{{ list.id_str }}"
-                       id="list-{{ list.id_str }}" />
-                <label for="list-{{ list.id_str }}">{{ list.name }}</label>
-            </li>
-        {% endfor %}
-        <input type="submit" value='Choose'>
-        </form>
-    </ul>
-{% else %}
-    <p>no lists :(</p>
-{% endif %}
 
 {% endblock %}

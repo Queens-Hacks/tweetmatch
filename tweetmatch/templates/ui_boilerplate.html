@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block page %}
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <nav>
+        <a href="{{ url_for('hello') }}">tweetmatch</a>
+        <a href="{{ url_for('login') }}">login</a>
+        <a href="{{ url_for('logout') }}">logout</a>
+        <a href="{{ url_for('moar') }}">load tweets</a>
+        <a href="{{ url_for('me') }}">account</a>
+    </nav>
+
+
+    {% block content %}
+        <h1>hello.</h1>
+    {% endblock %}
+
+
+    <footer>
+        <p>the bottom</p>
+    </footer>
+
+{% endblock %}
