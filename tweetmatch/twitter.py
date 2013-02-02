@@ -72,57 +72,57 @@ def oauth_authorized(resp):
         if response.status != 200:
             print 'ERR'#, response.status
             flash('error...')
-        else:
-            me = TwitterUser(
-                twitter_id=resp['user_id'],
-                username=resp['screen_name'],
-                name=response.data['name'],
-                photo=response.data['profile_image_url'],
-            )
-            flash('welcome, {} :)'.format(me.name))
+            
+        me = TwitterUser(
+            twitter_id=resp['user_id'],
+            username=resp['screen_name'],
+            name=response.data['name'],
+            photo=response.data['profile_image_url'],
+        )
+        flash('welcome, {} :)'.format(me.name))
 
-            print('gathering user\'s timeline data...')
-            timeline = twitter.get('statuses/home_timeline.json', data={
-                'exclude_replies': True,
-                #'contributor_details': True,
-            })
-            print 'got status'#, timeline.status
-            if timeline.status != 200:
-                print 'ERR'#, timeline.data
-                flash('error asking about friends')
-            else:
-                print ('......')
-                flash(timeline.data)
-                for tweet in timeline.data:
-                    tweeter = Tweeter.query.get(tweet['user']['id_str'])
+    print('gathering user\'s timeline data...')
+    timeline = twitter.get('statuses/home_timeline.json', data={
+        'exclude_replies': True,
+        #'contributor_details': True,
+    })
+    print 'got status'#, timeline.status
+    if timeline.status != 200:
+        print 'ERR'#, timeline.data
+        flash('error asking about friends')
+    else:
+        print ('......')
+        flash(timeline.data)
+        for tweet in timeline.data:
+            tweeter = Tweeter.query.get(tweet['user']['id_str'])
 
-                    tweetobj = Tweet.query.get(tweet['id_str'])
-                    if not tweetobj:
-                        print 'creating tweet'#, tweet['text']
+            tweetobj = Tweet.query.get(tweet['id_str'])
+            if not tweetobj:
+                print 'creating tweet'#, tweet['text']
 
-                        if not tweeter:
-                            print 'creating tweeter'#, tweet['user']['screen_name']
-                            tweeter = Tweeter(
-                                id=tweet['user']['id_str'],
-                                username=tweet['user']['screen_name'],
-                                name=tweet['user']['name'],
-                                pic_url=tweet['user']['profile_image_url'],
-                            )
+                if not tweeter:
+                    print 'creating tweeter'#, tweet['user']['screen_name']
+                    tweeter = Tweeter(
+                        id=tweet['user']['id_str'],
+                        username=tweet['user']['screen_name'],
+                        name=tweet['user']['name'],
+                        pic_url=tweet['user']['profile_image_url'],
+                    )
 
-                        tweetobj = Tweet(
-                            id=tweet['id_str'],
-                            text=tweet['text'],
-                            timestamp=None,
-                            user=tweeter,
-                        )
+                tweetobj = Tweet(
+                    id=tweet['id_str'],
+                    text=tweet['text'],
+                    timestamp=None,
+                    user=tweeter,
+                )
 
-                    me.following.append(tweeter)
-                    db.session.add(tweeter)
-                    db.session.add(tweetobj)
-                    db.session.commit()
-
-            db.session.add(me)
+            me.following.append(tweeter)
+            db.session.add(tweeter)
+            db.session.add(tweetobj)
             db.session.commit()
+
+    db.session.add(me)
+    db.session.commit()
 
     return redirect_url()
 
