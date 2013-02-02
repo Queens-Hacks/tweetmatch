@@ -13,7 +13,7 @@
 import random
 from flask import render_template, session, redirect, url_for, request
 from tweetmatch import app
-from tweetmatch.twitter import get_lists, set_list
+from tweetmatch.twitter import get_lists, set_list, load_timeline_tweets
 from tweetmatch.models import TwitterUser, Tweeter, Tweet
 
 
@@ -43,6 +43,16 @@ def challenge(challenge_id, challenge_slug=None):
     return 'hey'
 
 
+@app.route('/load-tweets')
+def moar():
+    # logged in?
+    if not session.get('twitter_token'):
+        return redirect(url_for('login'))
+    load_timeline_tweets()
+    return redirect(url_for('hello'))
+
+
+
 @app.route('/account', methods=['GET', 'POST'])
 def me():
     # logged in?
@@ -63,8 +73,6 @@ def me():
         current_list = [l for l in lists if l['id_str'] == current_list_id][0]
     except IndexError:
         current_list = lists[-1]
-
-    print 'clist', current_list
 
     return render_template('account.html', lists=lists, current_list=current_list)
 

@@ -61,8 +61,6 @@ def oauth_authorized(resp):
     me = TwitterUser.query.get(user_id)
     if me:
         flash('hello again {} :)'.format(me.name))
-        session['me'] = me
-        load_timeline_tweets()
 
     else:
         response = twitter.get('users/show.json', data={
@@ -83,7 +81,6 @@ def oauth_authorized(resp):
             photo=response.data['profile_image_url'],
         )
         flash('welcome, {} :)'.format(me.name))
-        session['me'] = me
         db.session.add(me)
         db.session.commit()
 
@@ -97,8 +94,9 @@ def load_timeline_tweets(from_list_id=None):
     https://dev.twitter.com/docs/api/1.1/get/statuses/home_timeline
     https://dev.twitter.com/docs/api/1.1/get/lists/statuses
     """
-    from_list_id = from_list_id or session['me'].follow_list
-    logging.info('gathering {}\'s timeline...', session['me'].name)
+    me = TwitterUser.query.get(session['my_id'])
+    from_list_id = from_list_id or me.follow_list
+    logging.info('gathering {}\'s timeline...', me.name)
     request_data = {
         'count': 200,
         # 'since_id': ...
@@ -123,6 +121,7 @@ def load_timeline_tweets(from_list_id=None):
         # and do something about it....    
 
     logging.info('saving new timeline tweets and any new users...')
+    num_added = 0
     for tweet_data in timeline.data:
         # first, see if we already have this tweet
         tweet = Tweet.query.get(tweet_data['id_str'])
@@ -154,6 +153,9 @@ def load_timeline_tweets(from_list_id=None):
         db.session.add(tweet)
 
         db.session.commit()
+        num_added += 1
+
+    flash('added {} new tweets'.format(num_added))
 
 
 def get_lists():
