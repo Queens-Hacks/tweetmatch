@@ -88,13 +88,15 @@ class Tweet(db.Model):
 class Challenge(db.Model):
     """gotta catch em all"""
     id = db.Column(db.Integer, primary_key=True)
-    tweet_id = db.Column(db.String(64), db.ForeignKey('tweet.id'))
-    tweet = db.relationship('Tweet',
-        backref=db.backref('challenges', lazy='dynamic'))
+    impostor_first = db.Column(db.Boolean(0))
+    
     impostor_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
     impostor = db.relationship('Tweeter',
         backref=db.backref('impostors', lazy='dynamic'))
-    impostor_first = db.Column(db.Boolean(0))
+
+    tweet_id = db.Column(db.String(64), db.ForeignKey('tweet.id'))
+    tweet = db.relationship('Tweet',
+        backref=db.backref('challenges', lazy='dynamic'))
 
     def __init__(self, tweet, impostor):
         self.tweet = tweet
@@ -117,20 +119,24 @@ class Challenge(db.Model):
 class Guess(db.Model):
     """who's the best"""
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.Time)
+    time = db.Column(db.DateTime, default=datetime.now)
+
+    user_id = db.Column(db.String(64), db.ForeignKey('twitter_user.id'))
+    user = db.relationship('TwitterUser',
+        backref=db.backref('guesses', lazy='dynamic'))
 
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'))
     challenge = db.relationship('Challenge',
         backref=db.backref('guesses', lazy='dynamic'))
 
-    tweeter_id = db.Column(db.Integer, db.ForeignKey('tweeter.id'))
+    tweeter_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
     charges = db.relationship('Tweeter',
         backref=db.backref('charges', lazy='dynamic'))
 
-    def __init__(self, challenge, charges):
+    def __init__(self, user, challenge, charges):
+        self.user = user
         self.challenge = challenge
         self.charges = charges
-        self.time = None # FIXME datetime.now()
 
     def judge(self):
         return self.charges is self.challenge.tweet.user
