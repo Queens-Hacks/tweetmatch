@@ -52,7 +52,8 @@ def hello():
                 guess = Guess(lastchallenge, accuse)
                 db.session.add(guess)
                 db.session.commit()
-                flash(guess.judge())
+                flash(app.character.guess_right if guess.judge() else
+                      app.character.guess_wrong)
     try:
         challenge = get_challenge()
         return redirect(url_for('vs', challenge_id=challenge.id,
