@@ -49,7 +49,7 @@ def hello():
             if not accuse:
                 flash('ERRRRRRRRRRRRRRRRRRR')
             else:
-                guess = Guess(lastchallenge, accuse)
+                guess = Guess(current_user, lastchallenge, accuse)
                 db.session.add(guess)
                 db.session.commit()
                 flash(app.character.guess_right if guess.judge() else
@@ -117,7 +117,14 @@ def me():
     except IndexError:
         current_list = lists[-1]
 
-    return render_template('account.html', lists=lists, current_list=current_list)
+    guesses_query = Guess.query.filter(Guess.user == current_user)
+    total_guesses = guesses_query.count()
+    correct_guesses = sum([1 for g in guesses_query.all() if
+        g.challenge.tweet.user is g.charges])
+    guesses = {'total': total_guesses, 'correct': correct_guesses}
+
+    return render_template('account.html', lists=lists,
+        current_list=current_list, guesses=guesses)
 
 
 @app.errorhandler(404)
