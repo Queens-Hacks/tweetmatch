@@ -140,6 +140,7 @@ def load_timeline_tweets(from_list_id=None):
                 pic_url=user_data['profile_image_url'],
             )
             db.session.add(tweeter)
+            db.session.commit()
 
 
         logging.info('new tweet from {}'.format(tweeter.username))
@@ -149,10 +150,10 @@ def load_timeline_tweets(from_list_id=None):
             timestamp=None,
             user=tweeter,
         )
+        num_added += 1
         db.session.add(tweet)
 
-        db.session.commit()
-        num_added += 1
+    db.session.commit()
 
     flash('added {} new tweets'.format(num_added))
 
