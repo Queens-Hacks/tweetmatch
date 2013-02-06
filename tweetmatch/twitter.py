@@ -4,11 +4,15 @@ http://packages.python.org/Flask-OAuth/
 """
 
 import logging
+from datetime import datetime
 from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
 from flask.ext.login import login_user, current_user
 from tweetmatch import app
 from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
+
+
+TIME_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
 
 twitter = OAuth().remote_app('twitter',
@@ -39,8 +43,7 @@ def oauth_authorized(resp):
         resp['oauth_token_secret']
     )
 
-    user_id = resp['user_id']
-    me = TwitterUser.query.get(user_id)
+    me = TwitterUser.query.get(resp['user_id'])
     if me:
         flash(app.character.login.format(me.name))
 
@@ -76,11 +79,10 @@ def load_timeline_tweets(from_list_id=None):
     https://dev.twitter.com/docs/api/1.1/get/statuses/home_timeline
     https://dev.twitter.com/docs/api/1.1/get/lists/statuses
     """
-    me = current_user
-    from_list_id = from_list_id or me.follow_list
-    logging.info('gathering {}\'s timeline...', me.name)
+    from_list_id = from_list_id or current_user.follow_list
+    logging.info('gathering {}\'s timeline...', current_user.name)
     request_data = {
-        'count': 200, # 200 is max
+        'count': 10, # 200 is max
         # 'since_id': ...
     }
     if from_list_id:
@@ -122,7 +124,9 @@ def load_timeline_tweets(from_list_id=None):
                 name=user_data['name'],
                 pic_url=user_data['profile_image_url'],
             )
+            current_user.following.append(tweeter)
             db.session.add(tweeter)
+            db.session.add(current_user)
             db.session.commit()
 
 
@@ -130,11 +134,11 @@ def load_timeline_tweets(from_list_id=None):
         tweet = Tweet(
             id=tweet_data['id_str'],
             text=tweet_data['text'],
-            timestamp=None,
+            timestamp=datetime.strptime(tweet_data['created_at'], TIME_FORMAT),
             user=tweeter,
         )
-        num_added += 1
         db.session.add(tweet)
+        num_added += 1
 
     db.session.commit()
 
@@ -154,16 +158,4 @@ def get_lists():
         flash(app.character.twitter_error)
 
     return lists.data
-
-
-def set_list(list_id):
-    """set the logged-in user's twitter list of people to pull tweets from"""
-    me = current_user
-    if not me:
-        logging.error('could not get logged in user')
-        flash('um... are you logged in?')
-
-    me.follow_list = list_id
-    db.session.add(me)
-    db.session.commit()
 
