@@ -14,8 +14,8 @@ import random
 from flask import render_template, session, redirect, url_for, request
 from flask.ext.login import login_required, current_user
 from tweetmatch import app
-from tweetmatch.twitter import get_lists, set_list, load_timeline_tweets
-from tweetmatch.models import TwitterUser, Tweeter, Tweet
+from tweetmatch.twitter import get_lists, load_timeline_tweets
+from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
 
 
 @app.route('/')
@@ -52,14 +52,17 @@ def moar():
 
 
 
+
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def me():
     if request.method == 'POST' and 'list' in request.form:
         if request.form['list'] == 'none':
-            set_list(None)
+            current_user.follow_list = None
         else:
-            set_list(request.form['list'])
+            current_user.follow_list = request.form['list']
+        db.session.add(current_user)
+        db.session.commit()
 
     lists = get_lists()
     lists.append({'name': 'don\'t use a list', 'id_str': None})
