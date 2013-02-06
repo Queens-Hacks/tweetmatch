@@ -24,7 +24,9 @@ def get_challenge(challenge_id=None):
         return Challenge.query.get(challenge_id)
 
     tweet = Tweet.query[random.randrange(Tweet.query.count())]
-    impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
+    impostor = tweet.user
+    while tweet.user is impostor:
+        impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
 
     challenge = Challenge.query.filter_by(tweet_id=tweet.id,
                                           impostor_id=impostor.id).first()
