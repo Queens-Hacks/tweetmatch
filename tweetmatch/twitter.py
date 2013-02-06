@@ -4,11 +4,15 @@ http://packages.python.org/Flask-OAuth/
 """
 
 import logging
+from datetime import datetime
 from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
 from flask.ext.login import login_user, current_user
 from tweetmatch import app
 from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
+
+
+TIME_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
 
 twitter = OAuth().remote_app('twitter',
@@ -128,7 +132,7 @@ def load_timeline_tweets(from_list_id=None):
         tweet = Tweet(
             id=tweet_data['id_str'],
             text=tweet_data['text'],
-            timestamp=None,
+            timestamp=datetime.strptime(tweet_data['created_at'], TIME_FORMAT),
             user=tweeter,
         )
         num_added += 1
