@@ -6,7 +6,7 @@ http://packages.python.org/Flask-OAuth/
 import logging
 from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
-from flask.ext.login import login_required, login_user, logout_user, current_user
+from flask.ext.login import login_user, current_user
 from tweetmatch import app
 from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
 
@@ -21,26 +21,9 @@ twitter = OAuth().remote_app('twitter',
 )
 
 
-def redirect_url():
-    return redirect(request.args.get('next') or request.referrer or '/')
-
-
 @twitter.tokengetter
 def get_twitter_token(token=None):
     return session.get('twitter_token')
-
-
-@app.route('/login')
-def login():
-    return twitter.authorize(callback=url_for('oauth_authorized'))
-
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    logout_user()
-    flash('bye bye :(')
-    return redirect_url()
 
 
 @app.route('/oauth-authorized')
@@ -85,7 +68,7 @@ def oauth_authorized(resp):
 
     login_user(me)
 
-    return redirect_url()
+    return redirect(request.args.get('next') or request.referrer or '/')
 
 
 def load_timeline_tweets(from_list_id=None):
