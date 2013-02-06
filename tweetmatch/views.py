@@ -36,8 +36,21 @@ def get_challenge(challenge_id=None):
     return challenge
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def hello():
+    if request.method == 'POST':
+        lastchallenge = Challenge.query.get(session['last_challenge_id'])
+        if not lastchallenge:
+            flash('ERRRRRR')
+        else:
+            accuse = Tweeter.query.get(request.form['suspect'])
+            if not accuse:
+                flash('ERRRRRRRRRRRRRRRRRRR')
+            else:
+                guess = Guess(lastchallenge, accuse)
+                db.session.add(guess)
+                db.session.commit()
+                flash(guess.judge())
     try:
         challenge = get_challenge()
         return redirect(url_for('vs', challenge_id=challenge.id,
@@ -70,6 +83,7 @@ def vs(challenge_id, challenge_slug=None):
     challenge = Challenge.query.get(challenge_id)
     if not challenge:
         return redirect(url_for('hello')) # WARNING infinite redirect possible?
+    session['last_challenge_id'] = challenge.id
     return render_template('home.html', challenge=challenge)
 
 

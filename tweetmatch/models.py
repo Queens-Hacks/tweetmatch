@@ -13,6 +13,7 @@
 
 
 import random
+from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import UserMixin
 from tweetmatch import app
@@ -117,11 +118,22 @@ class Guess(db.Model):
     """who's the best"""
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.Time)
-    win = db.Column(db.Boolean)
 
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'))
     challenge = db.relationship('Challenge',
         backref=db.backref('guesses', lazy='dynamic'))
+
+    tweeter_id = db.Column(db.Integer, db.ForeignKey('tweeter.id'))
+    charges = db.relationship('Tweeter',
+        backref=db.backref('charges', lazy='dynamic'))
+
+    def __init__(self, challenge, charges):
+        self.challenge = challenge
+        self.charges = charges
+        self.time = None # FIXME datetime.now()
+
+    def judge(self):
+        return self.challenge.tweet.user is self.charges
 
     def __repr__(self):
         return '<Guess for {} by {}>'.format(self.challenge, self.id)
