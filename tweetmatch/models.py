@@ -133,7 +133,7 @@ class Guess(db.Model):
         self.time = None # FIXME datetime.now()
 
     def judge(self):
-        return self.challenge.tweet.user is self.charges
+        return self.charges is self.challenge.tweet.user
 
     def __repr__(self):
         return '<Guess for {} by {}>'.format(self.challenge, self.id)
