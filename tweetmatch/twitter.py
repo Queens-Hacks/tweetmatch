@@ -42,7 +42,7 @@ def oauth_authorized(resp):
     user_id = resp['user_id']
     me = TwitterUser.query.get(user_id)
     if me:
-        flash('hello again {} :)'.format(me.name))
+        flash(app.character.login.format(me.name))
 
     else:
         response = twitter.get('users/show.json', data={
@@ -54,7 +54,7 @@ def oauth_authorized(resp):
             for error in lists.data['errors']:
                 logging.error('twitter {}: {}'.format(error['code'],
                                                       error['message']))
-            flash('error...')
+            flash(app.character.twitter_error)
 
         me = TwitterUser(
             twitter_id=resp['user_id'],
@@ -62,7 +62,7 @@ def oauth_authorized(resp):
             name=response.data['name'],
             photo=response.data['profile_image_url'],
         )
-        flash('welcome, {} :)'.format(me.name))
+        flash(app.character.login_first_time.format(me.name))
         db.session.add(me)
         db.session.commit()
 
@@ -99,7 +99,7 @@ def load_timeline_tweets(from_list_id=None):
         for error in lists.data['errors']:
             logging.error('twitter {}: {}'.format(error['code'],
                                                   error['message']))
-        flash('twitter is being mean :(')
+        flash(app.character.twitter_error)
         # and do something about it....    
 
     logging.info('saving new timeline tweets and any new users...')
@@ -138,7 +138,7 @@ def load_timeline_tweets(from_list_id=None):
 
     db.session.commit()
 
-    flash('added {} new tweets'.format(num_added))
+    flash(app.character.tweets_added.format(num_added))
 
 
 def get_lists():
@@ -151,7 +151,7 @@ def get_lists():
         for error in lists.data['errors']:
             logging.error('twitter {}: {}'.format(error['code'],
                                                   error['message']))
-        flash('twiter is being mean again :(')
+        flash(app.character.twitter_error)
 
     return lists.data
 
