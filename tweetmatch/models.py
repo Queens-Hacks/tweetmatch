@@ -12,6 +12,8 @@
 """
 
 
+import random
+from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import UserMixin
 from tweetmatch import app
@@ -89,9 +91,24 @@ class Challenge(db.Model):
     tweet_id = db.Column(db.String(64), db.ForeignKey('tweet.id'))
     tweet = db.relationship('Tweet',
         backref=db.backref('challenges', lazy='dynamic'))
-    poser_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
-    poser = db.relationship('Tweeter',
-        backref=db.backref('spoofs', lazy='dynamic'))
+    impostor_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
+    impostor = db.relationship('Tweeter',
+        backref=db.backref('impostors', lazy='dynamic'))
+    impostor_first = db.Column(db.Boolean(0))
+
+    def __init__(self, tweet, impostor):
+        self.tweet = tweet
+        self.impostor = impostor
+        self.impostor_first = random.choice([True, False])
+
+    def suspects(self):
+        if self.impostor_first:
+            return (self.impostor, self.tweet.user)
+        else:
+            return (self.tweet.user, self.impostor)
+
+    def slug(self):
+        return '-'.join(s.username.lower() for s in self.suspects())
 
     def __repr__(self):
         return '<Challenge {}>'.format(self.id)
@@ -101,11 +118,22 @@ class Guess(db.Model):
     """who's the best"""
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.Time)
-    win = db.Column(db.Boolean)
 
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'))
     challenge = db.relationship('Challenge',
         backref=db.backref('guesses', lazy='dynamic'))
+
+    tweeter_id = db.Column(db.Integer, db.ForeignKey('tweeter.id'))
+    charges = db.relationship('Tweeter',
+        backref=db.backref('charges', lazy='dynamic'))
+
+    def __init__(self, challenge, charges):
+        self.challenge = challenge
+        self.charges = charges
+        self.time = None # FIXME datetime.now()
+
+    def judge(self):
+        return self.charges is self.challenge.tweet.user
 
     def __repr__(self):
         return '<Guess for {} by {}>'.format(self.challenge, self.id)
