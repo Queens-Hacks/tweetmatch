@@ -14,35 +14,45 @@ import random
 from flask import render_template, session, redirect, url_for, request, flash
 from flask.ext.login import login_required, current_user, logout_user
 from tweetmatch import app
+from tweetmatch.logins import login_manager
 from tweetmatch.twitter import twitter, get_lists, load_timeline_tweets
-from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
+from tweetmatch.models import db, TwitterUser, Tweeter, Tweet, Challenge, Guess
+
+
+def get_challenge(challenge_id=None):
+    if challenge_id:
+        return Challenge.query.get(challenge_id)
+
+    tweet = Tweet.query[random.randrange(Tweet.query.count())]
+    impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
+
+    challenge = Challenge.query.filter_by(tweet_id=tweet.id,
+                                          impostor_id=impostor.id).first()
+    if not challenge:
+        challenge = Challenge(tweet, impostor)
+        db.session.add(challenge)
+        db.session.commit()
+
+    return challenge
 
 
 @app.route('/')
-@app.route('/challenge')
-def hello(challenge=None):
+def hello():
     try:
-        tweet = Tweet.query[random.randrange(Tweet.query.count())]
-        impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
-        suspects = [tweet.user, impostor]
-        random.shuffle(suspects)
+        challenge = get_challenge()
+        return redirect(url_for('vs', challenge_id=challenge.id,
+                                challenge_slug=challenge.slug()))
     except ValueError:
-        # no tweets imported yet
-        tweet = 'blah blah blah'
-        suspects = ['a', 'b']
-    challenge = {
-        'id': 1,
-        'tweet': tweet,
-        'suspects': suspects,
-    }
-    return render_template('home.html', challenge=challenge)
+        return '<a href="{}">{}</a>'.format(url_for('moar'), 'login/load')
 
 
+@login_manager.unauthorized_handler
 @app.route('/login')
 def login():
     """Log the user in with twitter
     See tweetmatch.twitter for the login handler, which calls login.login_user
     """
+    session.clear()
     return twitter.authorize(callback=url_for('oauth_authorized'))
 
 
@@ -54,10 +64,13 @@ def logout():
     return redirect(request.args.get('next') or request.referrer or '/')
 
 
-@app.route('/challenge/<int:challenge_id>')
-@app.route('/challenge/<int:challenge_id>/<challenge_slug>')
-def challenge(challenge_id, challenge_slug=None):
-    return 'hey'
+@app.route('/vs/<string:challenge_id>')
+@app.route('/vs/<string:challenge_id>/<challenge_slug>')
+def vs(challenge_id, challenge_slug=None):
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return redirect(url_for('hello')) # WARNING infinite redirect possible?
+    return render_template('home.html', challenge=challenge)
 
 
 @app.route('/load-tweets')
@@ -93,3 +106,11 @@ def me():
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('page_not_found.html'), 404
+
+
+@app.errorhandler(503)
+def no_db(error):
+    if app.config['DEBUG']:
+        return "Couldn't connect to the db. Did you run manage.py creatdb?"
+    else:
+        return render_template('server_error.html'), 503

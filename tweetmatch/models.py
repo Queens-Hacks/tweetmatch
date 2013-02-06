@@ -12,6 +12,7 @@
 """
 
 
+import random
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import UserMixin
 from tweetmatch import app
@@ -89,9 +90,24 @@ class Challenge(db.Model):
     tweet_id = db.Column(db.String(64), db.ForeignKey('tweet.id'))
     tweet = db.relationship('Tweet',
         backref=db.backref('challenges', lazy='dynamic'))
-    poser_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
-    poser = db.relationship('Tweeter',
-        backref=db.backref('spoofs', lazy='dynamic'))
+    impostor_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
+    impostor = db.relationship('Tweeter',
+        backref=db.backref('impostors', lazy='dynamic'))
+    impostor_first = db.Column(db.Boolean(0))
+
+    def __init__(self, tweet, impostor):
+        self.tweet = tweet
+        self.impostor = impostor
+        self.impostor_first = random.choice([True, False])
+
+    def suspects(self):
+        if self.impostor_first:
+            return (self.impostor, self.tweet.user)
+        else:
+            return (self.tweet.user, self.impostor)
+
+    def slug(self):
+        return '-'.join(s.username.lower() for s in self.suspects())
 
     def __repr__(self):
         return '<Challenge {}>'.format(self.id)

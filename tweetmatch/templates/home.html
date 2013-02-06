@@ -5,12 +5,12 @@
     <p>at {{ challenge.tweet.timestamp }}</p>
 
     <form action="/" method="post">
-        {% for suspect in challenge.suspects %}
+        {% for suspect in challenge.suspects() %}
             <label for="suspect-{{ suspect.id }}">
                 <h3>@{{ suspect.username }}</h3>
                 <img title="{{ suspect.name }}"
                      alt="@{{ suspect.username }}'s profile picture"
-                     src="{% if suspect.pic_url %}{{ suspect.pic_url.replace('_normal', '') }}{% else %}http://images.wikia.com/avatar/images/0/04/Angry_Aang_in_Avatar_State.png{% endif %}"
+                     src="{{ suspect.pic_url.replace('_normal', '') }}"
                      width="150" />
                 <p>{{ suspect.name }}</p>
             </label>
