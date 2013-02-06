@@ -13,6 +13,7 @@
 
 
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.login import UserMixin
 from tweetmatch import app
 db = SQLAlchemy(app)
 
@@ -23,7 +24,7 @@ follows = db.Table('follows',
 )
 
 
-class TwitterUser(db.Model):
+class TwitterUser(db.Model, UserMixin):
     """People who have registered with the site"""
     id = db.Column(db.String(64), primary_key=True) # from twitter
     username = db.Column(db.String(80), unique=True)

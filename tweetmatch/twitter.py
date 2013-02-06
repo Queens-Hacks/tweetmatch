@@ -6,6 +6,7 @@ http://packages.python.org/Flask-OAuth/
 import logging
 from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
+from flask.ext.login import login_required, login_user, logout_user, current_user
 from tweetmatch import app
 from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
 
@@ -31,15 +32,13 @@ def get_twitter_token(token=None):
 
 @app.route('/login')
 def login():
-    if session.get('twitter_token'):
-        # already logged in
-        return redirect_url()
     return twitter.authorize(callback=url_for('oauth_authorized'))
 
 
 @app.route('/logout')
 def logout():
     session.clear()
+    logout_user()
     flash('bye bye :(')
     return redirect_url()
 
@@ -49,7 +48,7 @@ def logout():
 def oauth_authorized(resp):
     next_url = request.args.get('next') or url_for('hello')
     if resp is None:
-        flash(u'Could not sign in :(')
+        flash('Could not sign in :(')
         return redirect(next_url)
 
     session['twitter_token'] = (
@@ -84,7 +83,7 @@ def oauth_authorized(resp):
         db.session.add(me)
         db.session.commit()
 
-    session['my_id'] = me.id
+    login_user(me)
 
     return redirect_url()
 
@@ -94,7 +93,7 @@ def load_timeline_tweets(from_list_id=None):
     https://dev.twitter.com/docs/api/1.1/get/statuses/home_timeline
     https://dev.twitter.com/docs/api/1.1/get/lists/statuses
     """
-    me = TwitterUser.query.get(session['my_id'])
+    me = current_user
     from_list_id = from_list_id or me.follow_list
     logging.info('gathering {}\'s timeline...', me.name)
     request_data = {
@@ -175,7 +174,7 @@ def get_lists():
 
 def set_list(list_id):
     """set the logged-in user's twitter list of people to pull tweets from"""
-    me = TwitterUser.query.get(session['my_id'])
+    me = current_user
     if not me:
         logging.error('could not get logged in user')
         flash('um... are you logged in?')

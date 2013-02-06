@@ -12,6 +12,7 @@
 
 import random
 from flask import render_template, session, redirect, url_for, request
+from flask.ext.login import login_required, current_user
 from tweetmatch import app
 from tweetmatch.twitter import get_lists, set_list, load_timeline_tweets
 from tweetmatch.models import TwitterUser, Tweeter, Tweet
@@ -44,21 +45,16 @@ def challenge(challenge_id, challenge_slug=None):
 
 
 @app.route('/load-tweets')
+@login_required
 def moar():
-    # logged in?
-    if not session.get('twitter_token'):
-        return redirect(url_for('login'))
     load_timeline_tweets()
     return redirect(url_for('hello'))
 
 
 
 @app.route('/account', methods=['GET', 'POST'])
+@login_required
 def me():
-    # logged in?
-    if not session.get('twitter_token'):
-        return redirect(url_for('login'))
-
     if request.method == 'POST' and 'list' in request.form:
         if request.form['list'] == 'none':
             set_list(None)
@@ -68,7 +64,7 @@ def me():
     lists = get_lists()
     lists.append({'name': 'don\'t use a list', 'id_str': None})
 
-    current_list_id = TwitterUser.query.get(session['my_id']).follow_list
+    current_list_id = current_user.follow_list
     try:
         current_list = [l for l in lists if l['id_str'] == current_list_id][0]
     except IndexError:
