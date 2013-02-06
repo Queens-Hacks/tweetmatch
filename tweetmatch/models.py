@@ -12,7 +12,10 @@
 """
 
 
+import random
+from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.login import UserMixin
 from tweetmatch import app
 db = SQLAlchemy(app)
 
@@ -23,7 +26,7 @@ follows = db.Table('follows',
 )
 
 
-class TwitterUser(db.Model):
+class TwitterUser(db.Model, UserMixin):
     """People who have registered with the site"""
     id = db.Column(db.String(64), primary_key=True) # from twitter
     username = db.Column(db.String(80), unique=True)
@@ -85,12 +88,29 @@ class Tweet(db.Model):
 class Challenge(db.Model):
     """gotta catch em all"""
     id = db.Column(db.Integer, primary_key=True)
+    impostor_first = db.Column(db.Boolean(0))
+    
+    impostor_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
+    impostor = db.relationship('Tweeter',
+        backref=db.backref('impostors', lazy='dynamic'))
+
     tweet_id = db.Column(db.String(64), db.ForeignKey('tweet.id'))
     tweet = db.relationship('Tweet',
         backref=db.backref('challenges', lazy='dynamic'))
-    poser_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
-    poser = db.relationship('Tweeter',
-        backref=db.backref('spoofs', lazy='dynamic'))
+
+    def __init__(self, tweet, impostor):
+        self.tweet = tweet
+        self.impostor = impostor
+        self.impostor_first = random.choice([True, False])
+
+    def suspects(self):
+        if self.impostor_first:
+            return (self.impostor, self.tweet.user)
+        else:
+            return (self.tweet.user, self.impostor)
+
+    def slug(self):
+        return '-'.join(s.username.lower() for s in self.suspects())
 
     def __repr__(self):
         return '<Challenge {}>'.format(self.id)
@@ -99,12 +119,27 @@ class Challenge(db.Model):
 class Guess(db.Model):
     """who's the best"""
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.Time)
-    win = db.Column(db.Boolean)
+    time = db.Column(db.DateTime, default=datetime.now)
+
+    user_id = db.Column(db.String(64), db.ForeignKey('twitter_user.id'))
+    user = db.relationship('TwitterUser',
+        backref=db.backref('guesses', lazy='dynamic'))
 
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'))
     challenge = db.relationship('Challenge',
         backref=db.backref('guesses', lazy='dynamic'))
+
+    tweeter_id = db.Column(db.String(64), db.ForeignKey('tweeter.id'))
+    charges = db.relationship('Tweeter',
+        backref=db.backref('charges', lazy='dynamic'))
+
+    def __init__(self, user, challenge, charges):
+        self.user = user
+        self.challenge = challenge
+        self.charges = charges
+
+    def judge(self):
+        return self.charges is self.challenge.tweet.user
 
     def __repr__(self):
         return '<Guess for {} by {}>'.format(self.challenge, self.id)

@@ -4,10 +4,15 @@ http://packages.python.org/Flask-OAuth/
 """
 
 import logging
+from datetime import datetime
 from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
+from flask.ext.login import login_user, current_user
 from tweetmatch import app
 from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
+
+
+TIME_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
 
 twitter = OAuth().remote_app('twitter',
@@ -20,28 +25,9 @@ twitter = OAuth().remote_app('twitter',
 )
 
 
-def redirect_url():
-    return redirect(request.args.get('next') or request.referrer or '/')
-
-
 @twitter.tokengetter
 def get_twitter_token(token=None):
     return session.get('twitter_token')
-
-
-@app.route('/login')
-def login():
-    if session.get('twitter_token'):
-        # already logged in
-        return redirect_url()
-    return twitter.authorize(callback=url_for('oauth_authorized'))
-
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash('bye bye :(')
-    return redirect_url()
 
 
 @app.route('/oauth-authorized')
@@ -49,7 +35,7 @@ def logout():
 def oauth_authorized(resp):
     next_url = request.args.get('next') or url_for('hello')
     if resp is None:
-        flash(u'Could not sign in :(')
+        flash('Could not sign in :(')
         return redirect(next_url)
 
     session['twitter_token'] = (
@@ -57,10 +43,9 @@ def oauth_authorized(resp):
         resp['oauth_token_secret']
     )
 
-    user_id = resp['user_id']
-    me = TwitterUser.query.get(user_id)
+    me = TwitterUser.query.get(resp['user_id'])
     if me:
-        flash('hello again {} :)'.format(me.name))
+        flash(app.character.login.format(me.name))
 
     else:
         response = twitter.get('users/show.json', data={
@@ -72,7 +57,7 @@ def oauth_authorized(resp):
             for error in lists.data['errors']:
                 logging.error('twitter {}: {}'.format(error['code'],
                                                       error['message']))
-            flash('error...')
+            flash(app.character.twitter_error)
 
         me = TwitterUser(
             twitter_id=resp['user_id'],
@@ -80,13 +65,13 @@ def oauth_authorized(resp):
             name=response.data['name'],
             photo=response.data['profile_image_url'],
         )
-        flash('welcome, {} :)'.format(me.name))
+        flash(app.character.login_first_time.format(me.name))
         db.session.add(me)
         db.session.commit()
 
-    session['my_id'] = me.id
+    login_user(me)
 
-    return redirect_url()
+    return redirect(request.args.get('next') or request.referrer or '/')
 
 
 def load_timeline_tweets(from_list_id=None):
@@ -94,11 +79,10 @@ def load_timeline_tweets(from_list_id=None):
     https://dev.twitter.com/docs/api/1.1/get/statuses/home_timeline
     https://dev.twitter.com/docs/api/1.1/get/lists/statuses
     """
-    me = TwitterUser.query.get(session['my_id'])
-    from_list_id = from_list_id or me.follow_list
-    logging.info('gathering {}\'s timeline...', me.name)
+    from_list_id = from_list_id or current_user.follow_list
+    logging.info('gathering {}\'s timeline...', current_user.name)
     request_data = {
-        'count': 200, # 200 is max
+        'count': 10, # 200 is max
         # 'since_id': ...
     }
     if from_list_id:
@@ -117,7 +101,7 @@ def load_timeline_tweets(from_list_id=None):
         for error in lists.data['errors']:
             logging.error('twitter {}: {}'.format(error['code'],
                                                   error['message']))
-        flash('twitter is being mean :(')
+        flash(app.character.twitter_error)
         # and do something about it....    
 
     logging.info('saving new timeline tweets and any new users...')
@@ -140,22 +124,25 @@ def load_timeline_tweets(from_list_id=None):
                 name=user_data['name'],
                 pic_url=user_data['profile_image_url'],
             )
+            current_user.following.append(tweeter)
             db.session.add(tweeter)
+            db.session.add(current_user)
+            db.session.commit()
 
 
         logging.info('new tweet from {}'.format(tweeter.username))
         tweet = Tweet(
             id=tweet_data['id_str'],
             text=tweet_data['text'],
-            timestamp=None,
+            timestamp=datetime.strptime(tweet_data['created_at'], TIME_FORMAT),
             user=tweeter,
         )
         db.session.add(tweet)
-
-        db.session.commit()
         num_added += 1
 
-    flash('added {} new tweets'.format(num_added))
+    db.session.commit()
+
+    flash(app.character.tweets_added.format(num_added))
 
 
 def get_lists():
@@ -168,19 +155,7 @@ def get_lists():
         for error in lists.data['errors']:
             logging.error('twitter {}: {}'.format(error['code'],
                                                   error['message']))
-        flash('twiter is being mean again :(')
+        flash(app.character.twitter_error)
 
     return lists.data
-
-
-def set_list(list_id):
-    """set the logged-in user's twitter list of people to pull tweets from"""
-    me = TwitterUser.query.get(session['my_id'])
-    if not me:
-        logging.error('could not get logged in user')
-        flash('um... are you logged in?')
-
-    me.follow_list = list_id
-    db.session.add(me)
-    db.session.commit()
 

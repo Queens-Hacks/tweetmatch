@@ -4,3 +4,4 @@ venv
 *.swp
 dev-db.sqlite3
 twitter_keys.py
+.DS_Store
