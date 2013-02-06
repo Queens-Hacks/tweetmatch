@@ -1,0 +1,11 @@
+login: 'Welcome back!!! {}.'
+login_first_time: 'Hello {}.'
+login_fail: 'Could not log you in :('
+logout: 'bye'
+
+twitter_rate_limited: 'slow down'
+twitter_unauthorized: 'twitter says no'
+twitter_not_found: 'not found'
+twitter_error: 'twitter error'
+
+tweets_loaded: 'added {} new tweets'

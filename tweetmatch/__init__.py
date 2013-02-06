@@ -21,6 +21,7 @@ app = Flask(__name__)
 import tweetmatch.config
 import tweetmatch.twitter
 import tweetmatch.logins
+import tweetmatch.character
 import tweetmatch.views
 #import tweetmatch.assets
 

@@ -50,7 +50,7 @@ def login():
 def logout():
     session.clear()
     logout_user()
-    flash('bye bye :(')
+    flash(app.character.logout)
     return redirect(request.args.get('next') or request.referrer or '/')
 
 
