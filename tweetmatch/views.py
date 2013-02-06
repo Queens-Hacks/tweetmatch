@@ -79,8 +79,8 @@ def logout():
     return redirect(request.args.get('next') or request.referrer or '/')
 
 
-@app.route('/vs/<string:challenge_id>')
-@app.route('/vs/<string:challenge_id>/<challenge_slug>')
+@app.route('/vs/<int:challenge_id>')
+@app.route('/vs/<int:challenge_id>/<challenge_slug>')
 def vs(challenge_id, challenge_slug=None):
     challenge = Challenge.query.get(challenge_id)
     if not challenge:
@@ -93,7 +93,7 @@ def vs(challenge_id, challenge_slug=None):
 @login_required
 def moar():
     load_timeline_tweets()
-    return redirect(url_for('hello'))
+    return redirect(request.args.get('next') or request.referrer or '/')
 
 
 @app.route('/account', methods=['GET', 'POST'])
