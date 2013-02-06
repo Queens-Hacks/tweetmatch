@@ -26,6 +26,23 @@ def get_twitter_token(token=None):
     return session.get('twitter_token')
 
 
+<<<<<<< HEAD
+=======
+@app.route('/login')
+def login():
+    return twitter.authorize(callback=url_for('oauth_authorized'))
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    del session['twitter_token']
+    logout_user()
+    flash('bye bye :(')
+    return redirect_url()
+
+
+>>>>>>> enhance/login
 @app.route('/oauth-authorized')
 @twitter.authorized_handler
 def oauth_authorized(resp):
@@ -39,8 +56,7 @@ def oauth_authorized(resp):
         resp['oauth_token_secret']
     )
 
-    user_id = resp['user_id']
-    me = TwitterUser.query.get(user_id)
+    me = TwitterUser.query.get(resp['user_id'])
     if me:
         flash('hello again {} :)'.format(me.name))
 
@@ -76,9 +92,8 @@ def load_timeline_tweets(from_list_id=None):
     https://dev.twitter.com/docs/api/1.1/get/statuses/home_timeline
     https://dev.twitter.com/docs/api/1.1/get/lists/statuses
     """
-    me = current_user
-    from_list_id = from_list_id or me.follow_list
-    logging.info('gathering {}\'s timeline...', me.name)
+    from_list_id = from_list_id or current_user.follow_list
+    logging.info('gathering {}\'s timeline...', current_user.name)
     request_data = {
         'count': 200, # 200 is max
         # 'since_id': ...
@@ -154,16 +169,4 @@ def get_lists():
         flash('twiter is being mean again :(')
 
     return lists.data
-
-
-def set_list(list_id):
-    """set the logged-in user's twitter list of people to pull tweets from"""
-    me = current_user
-    if not me:
-        logging.error('could not get logged in user')
-        flash('um... are you logged in?')
-
-    me.follow_list = list_id
-    db.session.add(me)
-    db.session.commit()
 
