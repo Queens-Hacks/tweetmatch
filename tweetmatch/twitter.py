@@ -124,7 +124,9 @@ def load_timeline_tweets(from_list_id=None):
                 name=user_data['name'],
                 pic_url=user_data['profile_image_url'],
             )
+            current_user.following.append(tweeter)
             db.session.add(tweeter)
+            db.session.add(current_user)
             db.session.commit()
 
 
@@ -135,8 +137,8 @@ def load_timeline_tweets(from_list_id=None):
             timestamp=datetime.strptime(tweet_data['created_at'], TIME_FORMAT),
             user=tweeter,
         )
-        num_added += 1
         db.session.add(tweet)
+        num_added += 1
 
     db.session.commit()
 
