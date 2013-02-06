@@ -11,10 +11,10 @@
 
 
 import random
-from flask import render_template, session, redirect, url_for, request
-from flask.ext.login import login_required, current_user
+from flask import render_template, session, redirect, url_for, request, flash
+from flask.ext.login import login_required, current_user, logout_user
 from tweetmatch import app
-from tweetmatch.twitter import get_lists, set_list, load_timeline_tweets
+from tweetmatch.twitter import twitter, get_lists, set_list, load_timeline_tweets
 from tweetmatch.models import TwitterUser, Tweeter, Tweet
 
 
@@ -38,6 +38,22 @@ def hello(challenge=None):
     return render_template('home.html', challenge=challenge)
 
 
+@app.route('/login')
+def login():
+    """Log the user in with twitter
+    See tweetmatch.twitter for the login handler, which calls login.login_user
+    """
+    return twitter.authorize(callback=url_for('oauth_authorized'))
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    logout_user()
+    flash('bye bye :(')
+    return redirect(request.args.get('next') or request.referrer or '/')
+
+
 @app.route('/challenge/<int:challenge_id>')
 @app.route('/challenge/<int:challenge_id>/<challenge_slug>')
 def challenge(challenge_id, challenge_slug=None):
@@ -49,7 +65,6 @@ def challenge(challenge_id, challenge_slug=None):
 def moar():
     load_timeline_tweets()
     return redirect(url_for('hello'))
-
 
 
 @app.route('/account', methods=['GET', 'POST'])
