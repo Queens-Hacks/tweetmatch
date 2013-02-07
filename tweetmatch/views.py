@@ -60,6 +60,7 @@ def hello():
                     db.session.commit()
                     correct = guess.judge()
 
+                session['streak'] = session.get('streak', 0)
                 if correct:
                     session['streak'] += 1
                     if session['streak'] > 1:
