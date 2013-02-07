@@ -85,16 +85,13 @@ class Tweet(db.Model):
         return '<Tweet {:.9}...>'.format(self.text)
 
     def censor(self):
-        censored_text = self.text
-        censor_map = {
+        censors = {
             'url': '[www]',
             'hashtag': '[###]',
             'user_mention': '[@@@]'}
         for entity in self.entities:
-            censor = censor_map[entity.type]
             offending = self.text[entity.left_index:entity.right_index]
-            censored_text = censored_text.replace(offending, censor)
-
+            censored = censored_text.replace(offending, censors[entity.type])
         return censored_text
 
 
