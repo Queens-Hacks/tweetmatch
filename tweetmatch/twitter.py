@@ -9,7 +9,8 @@ from flask import request, session, redirect, url_for, flash
 from flask.ext.oauth import OAuth
 from flask.ext.login import login_user, current_user
 from tweetmatch import app
-from tweetmatch.models import db, TwitterUser, Tweeter, Tweet
+from tweetmatch.models import db, TwitterUser, Tweeter, Tweet, \
+                              URLEntity, HashtagEntity, UserMentionEntity
 
 
 TIME_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
@@ -138,6 +139,32 @@ def load_timeline_tweets(from_list_id=None):
             user=tweeter,
         )
         db.session.add(tweet)
+
+        for url in tweet_data['entities']['urls']:
+            db.session.add(URLEntity(
+                indices=url['indices'],
+                tweet=tweet,
+                expanded=url['expanded_url'],
+                short=url['url'],
+                display=url['display_url'],
+            ))
+
+        for hashtag in tweet_data['entities']['hashtags']:
+            db.session.add(HashtagEntity(
+                indices=hashtag['indices'],
+                tweet=tweet,
+                text=hashtag['text'],
+            ))
+
+        for mention in tweet_data['entities']['user_mentions']:
+            db.session.add(UserMentionEntity(
+                indices=mention['indices'],
+                tweet=tweet,
+                user_id=mention['id_str'],
+                name=mention['name'],
+                screen_name=mention['screen_name'],
+            ))
+
         num_added += 1
 
     db.session.commit()

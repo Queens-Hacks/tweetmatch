@@ -84,11 +84,24 @@ class Tweet(db.Model):
     def __repr__(self):
         return '<Tweet {:.9}...>'.format(self.text)
 
+    def censor(self):
+        censored_text = self.text
+        censor_map = {
+            'url': '[www]',
+            'hashtag': '[###]',
+            'user_mention': '[@@@]'}
+        for entity in self.entities:
+            censor = censor_map[entity.type]
+            offending = self.text[entity.left_index:entity.right_index]
+            censored_text = censored_text.replace(offending, censor)
+
+        return censored_text
+
 
 class TweetEntity(db.Model):
     __tablename__ = 'entities'
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String('48'))
+    type = db.Column(db.String(24))
     left_index = db.Column(db.Integer)
     right_index = db.Column(db.Integer)
 
@@ -98,67 +111,63 @@ class TweetEntity(db.Model):
 
     __mapper_args__ = {'polymorphic_on': type}
 
+    def __init__(self, indices, tweet):
+        self.left_index, self.right_index = indices
+        self.tweet = tweet
 
-class UrlEntity(TweetEntity):
-    """
-    "urls": [
-        {
-            "expanded_url": "http://example.com/asdf",
-            "url": "http://t.co/asdf",
-            "indices": [
-                52,
-                73
-            ],
-            "display_url": "example.com/asdf"
-        }
-    ]
-    """
+    def __repr__(self):
+        return '<Entity for {0.tweet_id}>'.format(self)
+
+
+class URLEntity(TweetEntity):
+    __mapper_args__ = {'polymorphic_identity': 'url'}
+
     expanded = db.Column(db.String(200))
     short = db.Column(db.String(32))
     display = db.Column(db.String(150))
 
-    __mapper_args__ = {'polymorphic_identity': 'url'}
+    def __init__(self, indices, tweet, expanded, short, display):
+        super(URLEntity, self).__init__(indices, tweet)
+        self.expanded = expanded
+        self.short = short
+        self.display = display
+
+    def __repr__(self):
+        return '<URLEntity {0.tweet_id} {0.display}>'.format(self)
 
 
 class HashtagEntity(TweetEntity):
-    """
-    "hashtags": [
-        {
-            "text": "devnestSF"
-            "indices": [
-                6,
-                16
-            ]
-        }
-    ]
-    """
-    text = db.Column(db.String(140))
     __mapper_args__ = {'polymorphic_identity': 'hashtag'}
+
+    text = db.Column(db.String(140))
+
+    def __init__(self, indices, tweet, text):
+        super(HashtagEntity, self).__init__(indices, tweet)
+        self.text = text
+
+    def __repr__(self):
+        return '<HashtagEntity {0.tweet_id} #{0.text}>'.format(self)
 
 
 class UserMentionEntity(TweetEntity):
-    """
-    "user_mentions": [
-        {
-            "name": "Jason Costa",
-            "id_str": "14927800",
-            "id": 14927800,
-            "indices": [
-                14,
-                25
-            ],
-            "screen_name": "jasoncosta"
-        }
-    ]
-    """
+    __mapper_args__ = {'polymorphic_identity': 'user_mention'}
+
     user_id = db.Column(db.String(64))
     name = db.Column(db.String(21))
     screen_name = db.Column(db.String(80))
-    __mapper_args__ = {'polymorphic_identity': 'user_mention'}
+
+    def __init__(self, indices, tweet, user_id, name, screen_name):
+        super(UserMentionEntity, self).__init__(indices, tweet)
+        self.user_id = user_id
+        self.name = name
+        self.screen_name = screen_name
+
+    def __repr__(self):
+        return '<UserMentionEntity {0.tweet_id} @{0.screen_name}>'.format(self)
 
 
 class Challenge(db.Model):
-    """gotta catch em all"""
+    """"""
     id = db.Column(db.Integer, primary_key=True)
     impostor_first = db.Column(db.Boolean(0))
     

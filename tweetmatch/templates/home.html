@@ -1,7 +1,7 @@
 {% extends 'ui_boilerplate.html' %}
 {% block content %}
 
-    <h1>{{ challenge.tweet.text }}</h1>
+    <h1>{{ challenge.tweet.censor() }}</h1>
     <p>at {{ challenge.tweet.timestamp }}</p>
 
     <form action="{{ url_for('hello') }}" method="post">
