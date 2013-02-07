@@ -29,6 +29,7 @@ class messages(object):
     tweets_added = 'added {} new tweets'
 
     guess_right = 'yeah.'
+    guess_streak = 'yeah * {}.'
     guess_wrong = 'nope.'
 
 

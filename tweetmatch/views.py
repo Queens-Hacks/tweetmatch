@@ -54,8 +54,19 @@ def hello():
                 guess = Guess(current_user, lastchallenge, accuse)
                 db.session.add(guess)
                 db.session.commit()
-                flash(app.character.guess_right if guess.judge() else
-                      app.character.guess_wrong)
+
+                correct = guess.judge()
+                if correct:
+                    session['streak'] += 1
+                    if session['streak'] > 1:
+                        flash(app.character.guess_streak.format(
+                                                            session['streak']))
+                    else:
+                        flash(app.character.guess_right)
+                else:
+                    session['streak'] = 0
+                    flash(app.character.guess_wrong)
+
     try:
         challenge = get_challenge()
         return redirect(url_for('vs', challenge_id=challenge.id,
@@ -72,6 +83,7 @@ def login():
     See tweetmatch.twitter for the login handler, which calls login.login_user
     """
     session.clear()
+    session['streak'] = 0
     return twitter.authorize(callback=url_for('oauth_authorized'))
 
 
