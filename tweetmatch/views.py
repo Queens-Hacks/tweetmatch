@@ -51,11 +51,15 @@ def hello():
             if not accuse:
                 flash('ERRRRRRRRRRRRRRRRRRR')
             else:
-                guess = Guess(current_user, lastchallenge, accuse)
-                db.session.add(guess)
-                db.session.commit()
+                if current_user.is_anonymous:
+                    correct = lastchallenge.tweet.user is accuse
 
-                correct = guess.judge()
+                else:
+                    guess = Guess(current_user, lastchallenge, accuse)
+                    db.session.add(guess)
+                    db.session.commit()
+                    correct = guess.judge()
+
                 if correct:
                     session['streak'] += 1
                     if session['streak'] > 1:
