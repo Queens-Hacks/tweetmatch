@@ -11,6 +11,7 @@
 
 
 import random
+import logging
 from flask import render_template, session, redirect, url_for, request, flash
 from flask.ext.login import login_required, current_user, logout_user
 from tweetmatch import app
