@@ -11,6 +11,7 @@
 
 
 import random
+import logging
 from flask import render_template, session, redirect, url_for, request, flash
 from flask.ext.login import login_required, current_user, logout_user
 from tweetmatch import app
@@ -24,6 +25,7 @@ def get_challenge(challenge_id=None):
         return Challenge.query.get(challenge_id)
 
     tweet = Tweet.query[random.randrange(Tweet.query.count())]
+    
     impostor = tweet.user
     while tweet.user is impostor:
         impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
@@ -52,13 +54,25 @@ def hello():
                 guess = Guess(current_user, lastchallenge, accuse)
                 db.session.add(guess)
                 db.session.commit()
-                flash(app.character.guess_right if guess.judge() else
-                      app.character.guess_wrong)
+
+                correct = guess.judge()
+                if correct:
+                    session['streak'] += 1
+                    if session['streak'] > 1:
+                        flash(app.character.guess_streak.format(
+                                                            session['streak']))
+                    else:
+                        flash(app.character.guess_right)
+                else:
+                    session['streak'] = 0
+                    flash(app.character.guess_wrong)
+
     try:
         challenge = get_challenge()
         return redirect(url_for('vs', challenge_id=challenge.id,
                                 challenge_slug=challenge.slug()))
-    except ValueError:
+    except ValueError as e:
+        logging.error(e)
         return '<a href="{}">{}</a>'.format(url_for('moar'), 'login/load')
 
 
@@ -69,6 +83,7 @@ def login():
     See tweetmatch.twitter for the login handler, which calls login.login_user
     """
     session.clear()
+    session['streak'] = 0
     return twitter.authorize(callback=url_for('oauth_authorized'))
 
 
