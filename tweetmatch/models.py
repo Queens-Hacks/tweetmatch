@@ -85,6 +85,78 @@ class Tweet(db.Model):
         return '<Tweet {:.9}...>'.format(self.text)
 
 
+class TweetEntity(db.Model):
+    __tablename__ = 'entities'
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String('48'))
+    left_index = db.Column(db.Integer)
+    right_index = db.Column(db.Integer)
+
+    tweet_id = db.Column(db.String(64), db.ForeignKey('tweet.id'))
+    tweet = db.relationship('Tweet',
+        backref=db.backref('entities'))
+
+    __mapper_args__ = {'polymorphic_on': type}
+
+
+class UrlEntity(TweetEntity):
+    """
+    "urls": [
+        {
+            "expanded_url": "http://example.com/asdf",
+            "url": "http://t.co/asdf",
+            "indices": [
+                52,
+                73
+            ],
+            "display_url": "example.com/asdf"
+        }
+    ]
+    """
+    expanded = db.Column(db.String(200))
+    short = db.Column(db.String(32))
+    display = db.Column(db.String(150))
+
+    __mapper_args__ = {'polymorphic_identity': 'url'}
+
+
+class HashtagEntity(TweetEntity):
+    """
+    "hashtags": [
+        {
+            "text": "devnestSF"
+            "indices": [
+                6,
+                16
+            ]
+        }
+    ]
+    """
+    text = db.Column(db.String(140))
+    __mapper_args__ = {'polymorphic_identity': 'hashtag'}
+
+
+class UserMentionEntity(TweetEntity):
+    """
+    "user_mentions": [
+        {
+            "name": "Jason Costa",
+            "id_str": "14927800",
+            "id": 14927800,
+            "indices": [
+                14,
+                25
+            ],
+            "screen_name": "jasoncosta"
+        }
+    ]
+    """
+    user_id = db.Column(db.String(64))
+    name = db.Column(db.String(21))
+    screen_name = db.Column(db.String(80))
+    __mapper_args__ = {'polymorphic_identity': 'user_mention'}
+
+
 class Challenge(db.Model):
     """gotta catch em all"""
     id = db.Column(db.Integer, primary_key=True)
