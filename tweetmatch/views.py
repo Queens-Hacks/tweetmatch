@@ -24,6 +24,7 @@ def get_challenge(challenge_id=None):
         return Challenge.query.get(challenge_id)
 
     tweet = Tweet.query[random.randrange(Tweet.query.count())]
+    
     impostor = tweet.user
     while tweet.user is impostor:
         impostor = Tweeter.query[random.randrange(Tweeter.query.count())]
@@ -58,7 +59,8 @@ def hello():
         challenge = get_challenge()
         return redirect(url_for('vs', challenge_id=challenge.id,
                                 challenge_slug=challenge.slug()))
-    except ValueError:
+    except ValueError as e:
+        logging.error(e)
         return '<a href="{}">{}</a>'.format(url_for('moar'), 'login/load')
 
 
