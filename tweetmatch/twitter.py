@@ -82,7 +82,7 @@ def load_timeline_tweets(from_list_id=None):
     from_list_id = from_list_id or current_user.follow_list
     logging.info('gathering {}\'s timeline...', current_user.name)
     request_data = {
-        'count': 10, # 200 is max
+        'count': 200, # 200 is max
         # 'since_id': ...
     }
     if from_list_id:
