@@ -43,34 +43,29 @@ def get_challenge(challenge_id=None):
 @app.route('/', methods=['GET', 'POST'])
 def hello():
     if request.method == 'POST':
-        lastchallenge = Challenge.query.get(session['last_challenge_id'])
-        if not lastchallenge:
-            flash('ERRRRRR')
+
+        lastchallenge = Challenge.query.get_or_404(session['last_challenge_id'])
+        accuse = Tweeter.query.get_or_404(request.form['suspect'])
+        if current_user.is_anonymous:
+            correct = lastchallenge.tweet.user is accuse
+
         else:
-            accuse = Tweeter.query.get(request.form['suspect'])
-            if not accuse:
-                flash('ERRRRRRRRRRRRRRRRRRR')
+            guess = Guess(current_user, lastchallenge, accuse)
+            db.session.add(guess)
+            db.session.commit()
+            correct = guess.judge()
+
+        session['streak'] = session.get('streak', 0)
+        if correct:
+            session['streak'] += 1
+            if session['streak'] > 1:
+                flash(app.character.guess_streak.format(
+                                                    session['streak']))
             else:
-                if current_user.is_anonymous:
-                    correct = lastchallenge.tweet.user is accuse
-
-                else:
-                    guess = Guess(current_user, lastchallenge, accuse)
-                    db.session.add(guess)
-                    db.session.commit()
-                    correct = guess.judge()
-
-                session['streak'] = session.get('streak', 0)
-                if correct:
-                    session['streak'] += 1
-                    if session['streak'] > 1:
-                        flash(app.character.guess_streak.format(
-                                                            session['streak']))
-                    else:
-                        flash(app.character.guess_right)
-                else:
-                    session['streak'] = 0
-                    flash(app.character.guess_wrong)
+                flash(app.character.guess_right)
+        else:
+            session['streak'] = 0
+            flash(app.character.guess_wrong)
 
     try:
         challenge = get_challenge()
