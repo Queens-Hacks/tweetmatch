@@ -11,17 +11,6 @@
         {% endif %}
     {% endwith %}
 
-    <nav>
-        <a href="{{ url_for('hello') }}">tweetmatch</a>
-        {% if current_user.is_authenticated() %}
-            <a href="{{ url_for('moar') }}">load my tweets</a>
-            <a href="{{ url_for('me') }}">{{ current_user.name }}</a>
-            <a href="{{ url_for('logout') }}">logout</a>
-        {% else %}
-            <a href="{{ url_for('login') }}">login</a>
-        {% endif %}
-    </nav>
-
 
     {% block content %}
         <h1>hello.</h1>
@@ -29,7 +18,23 @@
 
 
     <footer>
-        <p>the bottom</p>
+        <div id='footer'>
+            <div id="fBar">
+                
+            </div>
+            <div id="fContent" class='drawerDown'>
+                <nav>
+                    <a href="{{ url_for('hello') }}">tweetmatch</a>
+                    {% if current_user.is_authenticated() %}
+                        <a href="{{ url_for('moar') }}">load my tweets</a>
+                        <a href="{{ url_for('me') }}">{{ current_user.name }}</a>
+                        <a href="{{ url_for('logout') }}">logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}">login</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
     </footer>
 
 {% endblock %}
