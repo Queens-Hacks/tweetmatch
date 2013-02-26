@@ -8,6 +8,8 @@
 
         {% set suspect = challenge.suspect.0 %}
 
+        {# TODO: make the suspect thing into a jinja macro? #}
+
         <label for="suspect-{{ suspect.id }}" id="label-left" class="challenge-left">
             <h3>@{{ suspect.username }}</h3>
             <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{{ suspect.pic_url.replace('_normal', '') }}" width="150" />
