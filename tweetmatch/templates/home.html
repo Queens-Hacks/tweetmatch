@@ -4,22 +4,29 @@
     <p>{{ challenge.tweet.timestamp }}</p>
     <p>"{{ challenge.tweet.censor() }}"</p>
 
-    <div id='underL' class='bg underlay bgL left'></div>
-    <div id='underR' class='bg underlay bgR right'></div>
-
     <form action="{{ url_for('hello') }}" method="post">
-        {% for suspect in challenge.suspects() %}
-            {% set leftright = loop.cycle('left', 'right') %}
 
-            <label for="suspect-{{ suspect.id }}" id="label-{{ leftright }}" class="{{ leftright }}">
-                <h3>@{{ suspect.username }}</h3>
-                <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{{ suspect.pic_url.replace('_normal', '') }}" width="150" />
-                <p>{{ suspect.name }}</p>
-            </label>
+        {% set suspect = challenge.suspect.0 %}
 
-            <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
+        <label for="suspect-{{ suspect.id }}" id="label-left" class="challenge-left">
+            <h3>@{{ suspect.username }}</h3>
+            <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{{ suspect.pic_url.replace('_normal', '') }}" width="150" />
+            <p>{{ suspect.name }}</p>
+        </label>
 
-        {% endfor %}
+        <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
+
+
+        {% set suspect = challenge.suspect.1 %}
+
+        <label for="suspect-{{ suspect.id }}" id="label-left" class="challenge-left">
+            <h3>@{{ suspect.username }}</h3>
+            <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{{ suspect.pic_url.replace('_normal', '') }}" width="150" />
+            <p>{{ suspect.name }}</p>
+        </label>
+
+        <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
+
         <input type="submit" />
     </form>
 
