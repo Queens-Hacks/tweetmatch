@@ -6,7 +6,7 @@
 
     <form action="{{ url_for('hello') }}" method="post">
 
-        {% set suspect = challenge.suspect.0 %}
+        {% set suspect = challenge.suspects().0 %}
 
         {# TODO: make the suspect thing into a jinja macro? #}
 
@@ -19,7 +19,7 @@
         <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
 
 
-        {% set suspect = challenge.suspect.1 %}
+        {% set suspect = challenge.suspects().1 %}
 
         <label for="suspect-{{ suspect.id }}" id="label-left" class="challenge-left">
             <h3>@{{ suspect.username }}</h3>
