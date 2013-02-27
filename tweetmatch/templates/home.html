@@ -1,21 +1,34 @@
 {% extends 'ui_boilerplate.html' %}
 {% block content %}
 
-    <h1>{{ challenge.tweet.censor() }}</h1>
-    <p>at {{ challenge.tweet.timestamp }}</p>
+    <p>{{ challenge.tweet.timestamp }}</p>
+    <p>"{{ challenge.tweet.censor() }}"</p>
 
     <form action="{{ url_for('hello') }}" method="post">
-        {% for suspect in challenge.suspects() %}
-            <label for="suspect-{{ suspect.id }}">
-                <h3>@{{ suspect.username }}</h3>
-                <img title="{{ suspect.name }}"
-                     alt="@{{ suspect.username }}'s profile picture"
-                     src="{{ suspect.pic_url.replace('_normal', '') }}"
-                     width="150" />
-                <p>{{ suspect.name }}</p>
-            </label>
-            <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
-        {% endfor %}
+
+        {% set suspect = challenge.suspects().0 %}
+
+        {# TODO: make the suspect thing into a jinja macro? #}
+
+        <label for="suspect-{{ suspect.id }}" id="label-left" class="challenge-left">
+            <h3>@{{ suspect.username }}</h3>
+            <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{{ suspect.pic_url.replace('_normal', '') }}" width="150" />
+            <p>{{ suspect.name }}</p>
+        </label>
+
+        <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
+
+
+        {% set suspect = challenge.suspects().1 %}
+
+        <label for="suspect-{{ suspect.id }}" id="label-left" class="challenge-left">
+            <h3>@{{ suspect.username }}</h3>
+            <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{{ suspect.pic_url.replace('_normal', '') }}" width="150" />
+            <p>{{ suspect.name }}</p>
+        </label>
+
+        <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
+
         <input type="submit" />
     </form>
 
