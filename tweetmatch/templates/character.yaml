@@ -1,5 +1,5 @@
-login: 'Welcome back!!! {}.'
-login_first_time: 'Hello {}.'
+login: 'Welcome back!!! {name}.'
+login_first_time: 'Hello {name}.'
 login_fail: 'Could not log you in :('
 logout: 'bye'
 
@@ -8,4 +8,4 @@ twitter_unauthorized: 'twitter says no'
 twitter_not_found: 'not found'
 twitter_error: 'twitter error'
 
-tweets_loaded: 'added {} new tweets'
+tweets_loaded: 'added {num} new tweets'
