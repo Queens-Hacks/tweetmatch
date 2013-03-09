@@ -1,57 +1,107 @@
 /* Reset */
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video { border:0; font-size:100%; font:inherit; vertical-align:baseline; margin:0; padding:0; }  article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section { display:block; }  body { line-height:1; }  ol,ul { list-style:none; }  blockquote,q { quotes:none; }  blockquote:before,blockquote:after,q:before,q:after { content:none; }  table { border-collapse:collapse; border-spacing:0; }
 
-p {
-    font-size: 48pt;
-    text-align: center;
+// mixins
+
+.visuallyhidden() {
+    position: relative;
 }
 
-label,
+// styles
+
+body {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 100;
+    text-align: center;
+}
+#content {
+    margin-bottom: 60px;
+}
+.thick {
+    font-weight: 400;
+}
+#annoyingwrapper {
+    padding: 4em 0 1.2em 0;
+}
+time {
+    font-size: 18pt;
+}
+blockquote {
+    margin: auto;
+    margin-bottom: .8em;
+    width: 75%;
+    font-size: 36pt;
+    line-height: 42pt;
+    text-align: center;
+}
+#fBar {
+    height: 60px;
+    background-color: #1c1a1c;
+    cursor: pointer;
+    font-size: 24pt;
+    line-height: 60px;
+}
+h1, h3, p {
+    height: 60px;
+}
+h3 {
+    text-align: left;
+    margin: -60px 0 0 12pt;
+}
+p {
+    text-align: right;
+    margin: -60px 12pt 0 0;
+}
+label {
+    width: 200px;
+    margin: 0 90px;
+    display: inline-block;
+    cursor: pointer;
+}
+img {
+    height: 150px;
+    width: 150px;
+    border-radius: 75px;
+}
+h2 {
+    font-size: 16pt;
+    line-height: 18pt;
+}
+input {
+    .visuallyhidden;
+}
 .bg {
+    z-index: -1;
     position: absolute;
     top: 0;
     bottom: 60px;
     width: 50%;
-
-    &.left { left: 0 }
-    &.right { right: 0 }
+    transition: background-color .5s;
+    -moz-transition: background-color .5s; /* Firefox 4 */
+    -webkit-transition: background-color .5s; /* Safari and Chrome */
+    -o-transition: background-color .5s; /* Opera */
 }
-
-.bgL {
+#underL {
     left: 0;
 }
-.bgR {
+#underR {
     right: 0;
 }
-// .overlay {
-//     z-index: 1;
-//     background-color: transparent;
-// }
-// .underlay {
-//     z-index: -1;
-// }
-
-#footer {
-    position: absolute;
+footer {
+    position: fixed;
     width: 100%;
     background-color: black;
     bottom: 0px;
-    z-index: 2;
+    z-index: 1;
 }
-
-#fBar {
-    height: 60px;
-    background-color: orange;
-}
-
 #fContent {
-    background-color: grey;
+    background-color: #edf2f2;
     transition: height 1s;
     -moz-transition: height 1s; /* Firefox 4 */
     -webkit-transition: height 1s; /* Safari and Chrome */
     -o-transition: height 1s; /* Opera */
+    overflow: hidden;
 }
-
 .drawerDown {
     height: 0;
 }
