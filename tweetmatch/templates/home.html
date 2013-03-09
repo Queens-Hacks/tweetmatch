@@ -1,36 +1,37 @@
 {% extends 'ui_boilerplate.html' %}
+
+
+{% macro suspect(suspect, side) %}
+    <label for="suspect-{{ suspect.id }}" id="label-{{ side }}" class="challenge-{{ side }}">
+        <img
+            title="{{ suspect.name }}"
+            alt="@{{ suspect.username }}'s profile picture"
+            src="{{ suspect.pic_url.replace('_normal', '') }}"
+            width="150"
+        />
+        <h2>@{{ suspect.username }}</h2>
+        <h2>{{ suspect.name }}</h2>
+    </label>
+
+    <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" class="radio-{{ side }}" />
+{% endmacro %}
+
+
 {% block content %}
 
-    <p>{{ challenge.tweet.timestamp }}</p>
-    <p>"{{ challenge.tweet.censor() }}"</p>
+    <div id="annoyingwrapper">
+        <time>{{ challenge.tweet.timestamp }}</time>
+    </div>
+    <blockquote>{{ challenge.tweet.censor() }}</blockquote>
 
-    <form action="{{ url_for('hello') }}" method="post">
-
-        {% set suspect = challenge.suspects().0 %}
-
-        {# TODO: make the suspect thing into a jinja macro? #}
-
-        <label for="suspect-{{ suspect.id }}" id="label-left" class="challenge-left">
-            <h3>@{{ suspect.username }}</h3>
-            <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{{ suspect.pic_url.replace('_normal', '') }}" width="150" />
-            <p>{{ suspect.name }}</p>
-        </label>
-
-        <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
-
-
-        {% set suspect = challenge.suspects().1 %}
-
-        <label for="suspect-{{ suspect.id }}" id="label-left" class="challenge-left">
-            <h3>@{{ suspect.username }}</h3>
-            <img title="{{ suspect.name }}" alt="@{{ suspect.username }}'s profile picture" src="{{ suspect.pic_url.replace('_normal', '') }}" width="150" />
-            <p>{{ suspect.name }}</p>
-        </label>
-
-        <input type="radio" id="suspect-{{ suspect.id }}" name="suspect" value="{{ suspect.id }}" />
-
-        <input type="submit" />
+    <form action="{{ url_for('hello') }}" method="post" id="challenge-form" >
+        {% set suspects = challenge.suspects() %}
+        {{ suspect(suspects.0, 'left') }}
+        {{ suspect(suspects.1, 'right') }}
+        <input type="submit" id="challenge-submit" />
     </form>
 
-{% endblock %}
+    <div id='underL' class='bg'></div>
+    <div id='underR' class='bg'></div>
 
+{% endblock %}
