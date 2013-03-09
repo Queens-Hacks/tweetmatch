@@ -40,9 +40,8 @@ overR.onclick = function() {
 
 // practical code
 
-//var form = $('#challenge-form');
-
 $('input[type="radio"]').on('change', function() {
-    //form.submit();
     $("#challenge-submit").click();
 });
+
+$('html').removeClass('no-js').addClass('js');
