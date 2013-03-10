@@ -5,7 +5,7 @@
 
     Blah blah blah
 
-    :copyright: (c) 2013 by Queen's Haxx.
+    :copyright: (c) 2013 Queen's Haxx.
     :license: MIT, see the license file for more details.
 """
 
@@ -140,6 +140,12 @@ def me():
 
     return render_template('account.html', lists=lists,
         current_list=current_list, guesses=guesses)
+
+
+@app.route('/stats')
+def stats():
+    import tweetmatch.models
+    return render_template('stats.html', models=tweetmatch.models)
 
 
 @app.errorhandler(404)

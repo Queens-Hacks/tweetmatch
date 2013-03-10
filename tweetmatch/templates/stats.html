@@ -1,0 +1,14 @@
+
+<pre>
+twitter users: {{ models.TwitterUser.query.count() }}
+tweeters:      {{ models.Tweeter.query.count() }}
+tweets:        {{ models.Tweet.query.count() }}
+entities:      {{ models.TweetEntity.query.count() }}
+    urls:      {{ models.URLEntity.query.count() }}
+    hashtags:  {{ models.HashtagEntity.query.count() }}
+    mentions:  {{ models.UserMentionEntity.query.count() }}
+challenges:    {{ models.Challenge.query.count() }}
+guesses:       {{ models.Guess.query.count() }}
+
+total:         {{ models.TwitterUser.query.count() + models.Tweeter.query.count() + models.Tweet.query.count() + models.TweetEntity.query.count() + models.URLEntity.query.count() + models.HashtagEntity.query.count() + models.UserMentionEntity.query.count() + models.Challenge.query.count() + models.Guess.query.count() }}
+</pre>
