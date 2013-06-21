@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>TweetMatch 1.0</title>
+	<style>
+		/* Reset */
+		html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video { border:0; font-size:100%; font:inherit; vertical-align:baseline; margin:0; padding:0; }  article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section { display:block; }  body { line-height:1; }  ol,ul { list-style:none; }  blockquote,q { quotes:none; }  blockquote:before,blockquote:after,q:before,q:after { content:none; }  table { border-collapse:collapse; border-spacing:0; }
+
+		p {
+			font-size: 48pt;
+			text-align: center;
+		}
+		.bg {
+			z-index: -1;
+			position: absolute;
+			top: 0;
+			bottom: 60px;
+			width: 50%;
+			transition: background-color .5s;
+			-moz-transition: background-color .5s; /* Firefox 4 */
+			-webkit-transition: background-color .5s; /* Safari and Chrome */
+			-o-transition: background-color .5s; /* Opera */
+		}
+		#underL {
+			left: 0;
+		}
+		#underR {
+			right: 0;
+		}
+
+		footer {
+			position: absolute;
+			width: 100%;
+			background-color: black;
+			bottom: 0px;
+			z-index: 1;
+		}
+
+		#fBar {
+			height: 60px;
+			background-color: orange;
+			cursor: pointer;
+		}
+		#fContent {
+			background-color: #eee;
+			transition: height 1s;
+			-moz-transition: height 1s; /* Firefox 4 */
+			-webkit-transition: height 1s; /* Safari and Chrome */
+			-o-transition: height 1s; /* Opera */
+		}
+		.drawerDown {
+			height: 0;
+		}
+		.drawerUp {
+			height: 240px;
+		}
+	</style>
+</head>
+<body>
+	<p>November 2012, PM</p>
+	<p>"Lorem ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum ipsum"</p>
+
+	<div id='underL' class='bg'></div>
+	<div id='underR' class='bg'></div>
+		
+	<div id='footer'>
+		<div id="fBar">
+			
+		</div>
+		<div id="fContent" class='drawerDown'>
+			
+		</div>
+	</div>
+
+	<script>
+		var underL = document.getElementById('underL');
+		var underR = document.getElementById('underR');
+		var footerBar = document.getElementById('fBar');
+		var footerContent = document.getElementById('fContent')
+
+		//Set some variables
+		var IE = document.all?true:false; //Is it IE?
+		var winW = -1, winH = 0; //Check window size
+		var tempX = 0, tempY = 0; //Check mouse XY
+		var isExpanded = 0; //Check drawer expansion
+
+		//Check the mouse position
+		getMouseXY = function(e) {
+			if (IE) { // grab the x-y pos.s if browser is IE
+				tempX = event.clientX + document.body.scrollLeft;
+				tempY = event.clientY + document.body.scrollTop;
+			}
+			else {  // grab the x-y pos.s if browser is NS
+				tempX = e.pageX;
+				tempY = e.pageY;
+			}  
+
+			if (tempX < 0)tempX = 0;
+			if (tempY < 0)tempY = 0;
+
+			setBG(tempX); //Set the background, too :)
+
+			return true;
+		}
+
+		//Check the window size
+		getWindowDims = function(e) {
+			if (document.body && document.body.offsetWidth) { //old IE
+				winW = document.body.offsetWidth;
+				winH = document.body.offsetHeight;
+			}
+			if (document.compatMode=='CSS1Compat' &&
+				document.documentElement &&
+				document.documentElement.offsetWidth ) {
+				winW = document.documentElement.offsetWidth;
+				winH = document.documentElement.offsetHeight;
+			}
+			if (window.innerWidth && window.innerHeight) {
+				winW = window.innerWidth;
+				winH = window.innerHeight;
+			}
+
+			return true;
+		}
+
+		//Check the side of the background that the mouse is on and update backgrounds accordingly
+		setBG = function(x) {
+			if(tempX < winW / 2) {
+				underL.style.background = 'blue';
+				underR.style.background = 'white';
+			} else {
+				underL.style.background = 'white';
+				underR.style.background = 'blue';
+			}
+		}
+
+		//Toggle the drawer open and closed
+		toggleDrawer = function() {
+			footerContent.className = isExpanded ? 'drawerDown' : 'drawerUp';
+			isExpanded = 1 - isExpanded;
+		}
+
+		//Set the window values on load
+		if(IE)
+			window.attachEvent('onload', getWindowDims);
+		else window.addEventListener('load', getWindowDims, false);
+
+		//Set the mouse values on load
+		if(IE)
+			window.attachEvent('onload', getMouseXY);
+		else window.addEventListener('load', getMouseXY, false);
+
+		//Make the window values update if the window resizes
+		if(IE)
+			window.attachEvent('onresize', getWindowDims);
+		else window.addEventListener('resize', getWindowDims, false);
+
+		//Make the mouse values update if the mouse moves
+		if(IE)
+			window.attachEvent('onmousemove', getMouseXY);
+		else window.addEventListener('mousemove', getMouseXY, false);
+
+		//Drawer stuff
+		footerBar.onclick = function() {
+			toggleDrawer();
+		}
+/*		overL.onclick = function() {
+			if(isExpanded) toggleDrawer();
+		}
+		overR.onclick = function() {
+			if(isExpanded) toggleDrawer();
+		} */
+
+	</script>
+</body>
+</html>
